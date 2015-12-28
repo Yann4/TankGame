@@ -4,9 +4,6 @@
     <ClCompile Include="Boid.cpp">
       <Filter>Agent</Filter>
     </ClCompile>
-    <ClCompile Include="Worldmanager.cpp">
-      <Filter>World</Filter>
-    </ClCompile>
     <ClCompile Include="Scene.cpp">
       <Filter>World</Filter>
     </ClCompile>
@@ -25,16 +22,16 @@
     <ClCompile Include="Obstacle.cpp">
       <Filter>Objects</Filter>
     </ClCompile>
-    <ClCompile Include="MathHelper.cpp" />
+    <ClCompile Include="Worldmanager.cpp">
+      <Filter>Program</Filter>
+    </ClCompile>
+    <ClCompile Include="MathHelper.cpp">
+      <Filter>Misc</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Enums.h" />
-    <ClInclude Include="ObjectTypes.h" />
     <ClInclude Include="Boid.h">
       <Filter>Agent</Filter>
-    </ClInclude>
-    <ClInclude Include="Worldmanager.h">
-      <Filter>World</Filter>
     </ClInclude>
     <ClInclude Include="Scene.h">
       <Filter>World</Filter>
@@ -51,7 +48,18 @@
     <ClInclude Include="Obstacle.h">
       <Filter>Objects</Filter>
     </ClInclude>
-    <ClInclude Include="MathHelper.h" />
+    <ClInclude Include="Worldmanager.h">
+      <Filter>Program</Filter>
+    </ClInclude>
+    <ClInclude Include="ObjectTypes.h">
+      <Filter>Misc</Filter>
+    </ClInclude>
+    <ClInclude Include="Enums.h">
+      <Filter>Misc</Filter>
+    </ClInclude>
+    <ClInclude Include="MathHelper.h">
+      <Filter>Misc</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Agent">
@@ -65,6 +73,9 @@
     </Filter>
     <Filter Include="Objects">
       <UniqueIdentifier>{bb25d3d4-df97-4b5b-b84d-d565607700ab}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Misc">
+      <UniqueIdentifier>{aa402527-58b6-4073-9f0a-cdae417fed21}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

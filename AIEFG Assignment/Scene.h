@@ -8,14 +8,16 @@
 #include "gl/glut.h"
 #include "Obstacle.h"
 #include "ObjectTypes.h"
-#include <vector>
 #include "Boid.h"
 #include "MathHelper.h"
+
+#include <vector>
 
 class Scene
 {
 private:
 	position	 m_ScenarioOffset;
+	std::vector<Obstacle> walls;
 
 public:
 	Scene();
@@ -27,6 +29,9 @@ public:
 	
 private:
 	void	SetUpScenario();
+	bool	wallExistsAt(position pos);
+	void	generateMap();
+
 	void	DrawScenario();
 	void    UpdateScenario(int a_deltaTime);
 };

@@ -68,3 +68,8 @@ float distSquared(position a, position b)
 	float distSq = ((a.x - b.x) * (a.x - b.x)) + ((a.z - b.z) * (a.z - b.z));
 	return abs(distSq);
 }
+
+float roundToNearestHalf(float number)
+{
+	return round(number * 2) / 2;
+}

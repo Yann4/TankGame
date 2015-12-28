@@ -1,0 +1,70 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="Boid.cpp">
+      <Filter>Agent</Filter>
+    </ClCompile>
+    <ClCompile Include="Worldmanager.cpp">
+      <Filter>World</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene.cpp">
+      <Filter>World</Filter>
+    </ClCompile>
+    <ClCompile Include="Camera.cpp">
+      <Filter>Program</Filter>
+    </ClCompile>
+    <ClCompile Include="Program.cpp">
+      <Filter>Program</Filter>
+    </ClCompile>
+    <ClCompile Include="Viewer.cpp">
+      <Filter>Program</Filter>
+    </ClCompile>
+    <ClCompile Include="Collision.cpp">
+      <Filter>Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="Obstacle.cpp">
+      <Filter>Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="MathHelper.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Enums.h" />
+    <ClInclude Include="ObjectTypes.h" />
+    <ClInclude Include="Boid.h">
+      <Filter>Agent</Filter>
+    </ClInclude>
+    <ClInclude Include="Worldmanager.h">
+      <Filter>World</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene.h">
+      <Filter>World</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera.h">
+      <Filter>Program</Filter>
+    </ClInclude>
+    <ClInclude Include="Viewer.h">
+      <Filter>Program</Filter>
+    </ClInclude>
+    <ClInclude Include="Collision.h">
+      <Filter>Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Obstacle.h">
+      <Filter>Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="MathHelper.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Agent">
+      <UniqueIdentifier>{c91fde41-a348-441c-9266-aacf1869d134}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="World">
+      <UniqueIdentifier>{dcdedbc3-0d7d-402b-90b9-51677f4d8d2e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Program">
+      <UniqueIdentifier>{c694a03d-b09a-42ae-a2da-8f5e2f5bf474}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Objects">
+      <UniqueIdentifier>{bb25d3d4-df97-4b5b-b84d-d565607700ab}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

@@ -18,6 +18,8 @@ class Scene
 private:
 	position	 m_ScenarioOffset;
 	std::vector<Obstacle> walls;
+	std::vector<Boid> players;
+
 
 public:
 	Scene();
@@ -31,6 +33,7 @@ private:
 	void	SetUpScenario();
 	bool	wallExistsAt(position pos);
 	void	generateMap();
+	void	placePlayers(int numPlayers);
 
 	void	DrawScenario();
 	void    UpdateScenario(int a_deltaTime);

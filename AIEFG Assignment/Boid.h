@@ -48,7 +48,7 @@ public:
 	Boid(int id, position pos);
 	Boid& operator=(const Boid&) = default;
 
-	void Update(float delta, const std::vector<BoidInfo>& others);
+	void Update(float delta);
 	void Render();
 	
 	void resolveCollision(position moveBy);

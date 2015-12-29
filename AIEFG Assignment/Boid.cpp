@@ -27,7 +27,7 @@ Boid::Boid(int id, position pos) : id(id), pos(pos)
 	height = 0.5f;
 }
 
-void Boid::Update(float delta, const std::vector<BoidInfo>& others)
+void Boid::Update(float delta)
 {
 	delta = 0.03;
 

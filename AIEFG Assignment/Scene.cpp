@@ -174,15 +174,61 @@ void Scene::generateMap()
 	}
 }
 
+#include <iostream>
+void Scene::placePlayers(int numPlayers)
+{
+	//21 is mapWidth
+	int sliceWidth = 21 / numPlayers;
+
+	for (int i = 0; i < numPlayers; i++)
+	{
+		int count = 0;
+		position playerLoc = position(randomInRange(i * sliceWidth, i* sliceWidth + sliceWidth), randomInRange(i * sliceWidth, i* sliceWidth + sliceWidth));
+		Boid player = Boid(i, playerLoc);
+		for (int j = 0; j < walls.size(); j++)
+		{
+			Collision::MTV trans;
+			trans.direction = position();
+			trans.magnitude = 0;
+
+			if (Collision::collision(Collision::BoundingBox(playerLoc.x, playerLoc.z, 0.5, 0.5), walls.at(j).getBoundingBox(), trans))
+			{
+				position mb = trans.direction * trans.magnitude;
+				player.resolveCollision(mb);
+				j = 0;
+				
+				if (count > 20)
+				{
+					walls.clear();
+					generateMap();
+					placePlayers(numPlayers);
+					return;
+				}
+
+				std::cout << count++ << std::endl;
+			}
+		}
+
+		players.push_back(player);
+	}
+}
+
+void Scene::SetUpScenario()
+{
+	//Set no offset, so drawing takes place in corner.
+	m_ScenarioOffset.x = 0.0f;
+	m_ScenarioOffset.z = 0.0f;
+
+	generateMap();
+
+	placePlayers(2);
+}
+
 //--------------------------------------------------------------------------------------------------------
 
 void Scene::Render()
 {
 	glClearColor(0.2, 0.5, 1, 0);
-	for (auto wall : walls)
-	{
-		wall.Render();
-	}
 
 	//Draw the Scenario.
 	DrawScenario();
@@ -201,20 +247,23 @@ void Scene::Update(int a_deltaTime)
 
 void Scene::DrawScenario()
 {
-}
+	for (auto wall : walls)
+	{
+		wall.Render();
+	}
 
-//Methods to set up pointer arrays to all the wall pieces.
-void Scene::SetUpScenario()
-{
-	//Set no offset, so drawing takes place in corner.
-	m_ScenarioOffset.x = 0.0f;
-	m_ScenarioOffset.z = 0.0f;
-
-	generateMap();
+	for (auto player : players)
+	{
+		player.Render();
+	}
 }
 
 //--------------------------------------------------------------------------------------------------------
 
 void Scene::UpdateScenario(int a_deltaTime)
 {
+	for (auto player : players)
+	{
+		player.Update(a_deltaTime);
+	}
 }

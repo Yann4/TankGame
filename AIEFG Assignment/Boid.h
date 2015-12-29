@@ -5,10 +5,13 @@
 #include "Enums.h"
 #include "Collision.h"
 #include "MathHelper.h"
+#include "Bullet.h"
+#include "Obstacle.h"
 
 #define _USE_MATH_DEFINES
 #include <math.h>
 
+class Bullet;
 struct BoidInfo
 {
 	int id;
@@ -34,11 +37,14 @@ private:
 	bool isTarget;
 	position pos;
 
+	int lives;
+	position spawnPoint;
 	position velocity;
-	float maxVelocity = 2.0f;
+	float maxVelocity = 1.0f;
 
 	//Display/collision information info
 	float rotation;
+	float turnSpeed = 3.0f;
 
 	Colour colour;
 
@@ -56,6 +62,7 @@ public:
 	Collision::BoundingBox getBoundingBox() { return Collision::BoundingBox(pos.x, pos.z, width, height); }
 	BoidInfo getInfo() { return BoidInfo(id, pos, velocity, isTarget); }
 
-private:
-	void UpdateLocation(position steeringForce, float delta);
+	void giveUpdateString(std::string actions, std::vector<Bullet*>& bullets);
+
+	void hitByBullet();
 };

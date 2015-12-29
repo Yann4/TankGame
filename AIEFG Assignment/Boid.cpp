@@ -14,23 +14,28 @@ Boid::Boid()
 
 	width = 0;
 	height = 0;
+
+	lives = 3;
+	spawnPoint = pos;
 }
 
 Boid::Boid(int id, position pos) : id(id), pos(pos)
 {
 	velocity = position();
-
+	spawnPoint = pos;
 	rotation = 0;
 	colour = Colour(0, 255, 0);
 
 	width = 0.25f;
 	height = 0.5f;
+	lives = 3;
 }
 
 void Boid::Update(float delta)
 {
-	delta = 0.03;
-
+	delta = 16;
+	pos += velocity / delta;
+	velocity = position(0, 0);
 }
 
 void Boid::Render()
@@ -43,19 +48,48 @@ void Boid::Render()
 	glPopMatrix();
 }
 
-void Boid::UpdateLocation(position steeringForce, float delta)
+void Boid::giveUpdateString(std::string actions, std::vector<Bullet*>& bullets)
 {
-	//Update position based on old velocity and accelleration (mass is 1)
-	pos += (velocity * delta) + ((steeringForce * (delta * delta) * 0.5f));
+	if (actions.find("A") != std::string::npos)
+	{
+		//Rotate left
+		rotation -= turnSpeed;
+	}
+	if (actions.find("D") != std::string::npos)
+	{
+		//Rotate right
+		rotation += turnSpeed;
+	}
 
-	//Update velocity
-	velocity += steeringForce * delta;
-	velocity = truncate(velocity, maxVelocity);
+	if (actions.find("W") != std::string::npos)
+	{
+		//Move forward
+		float rot = -(rotation * M_PI / 180);
+		velocity = position(cos(rot), sin(rot));
+		velocity = normalise(velocity) * maxVelocity;
+	}
+	if (actions.find("S") != std::string::npos)
+	{
+		//Move backwards
+		float rot = -(rotation * M_PI / 180);
+		velocity = position(cos(M_PI + rot), sin(M_PI + rot));
+		velocity = normalise(velocity) * maxVelocity;
+	}
 
-	//Update rotation
-	position heading = normalise(velocity);
-	float deg = atan2(-heading.z, heading.x) * 180 / M_PI;
-	rotation = deg;
+	if (actions.find("F") != std::string::npos)
+	{
+		//Fire
+		float rot = -(rotation * M_PI / 180);
+		position bVel = position(cos(rot), sin(rot));
+		bVel = normalise(bVel) * maxVelocity * 2;
+		bullets.push_back(new Bullet(pos + normalise(bVel), bVel));
+	}
+}
+
+void Boid::hitByBullet()
+{
+	lives--;
+	pos = spawnPoint;
 }
 
 void Boid::resolveCollision(position moveBy)

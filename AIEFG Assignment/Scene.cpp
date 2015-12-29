@@ -10,6 +10,11 @@ Scene::Scene()
 	//Current scenario
 	m_ScenarioOffset.x = 0.0f;
 	m_ScenarioOffset.z = 0.0f;
+
+	bullets = std::vector<Bullet*>();
+	walls = std::vector<Obstacle*>();
+	players = std::vector<Boid*>();
+
 	return;
 }
 
@@ -18,10 +23,25 @@ Scene::Scene()
 Scene::~Scene()
 {
 	//Delete the memory and references.
+
+	for (auto b : bullets)
+	{
+		delete b;
+	}
+
+	for (auto b : players)
+	{
+		delete b;
+	}
+
+	for (auto b : walls)
+	{
+		delete b;
+	}
 	return;
 }
 
-//--------------------------------------------------------------------------------------------------------
+//Initialise----------------------------------------------------------------------------------------------
 
 bool Scene::Initialise()
 {
@@ -36,7 +56,7 @@ bool Scene::wallExistsAt(position pos)
 {
 	for (auto wall : walls)
 	{
-		if (wall.GetX() == pos.x && wall.GetZ() == pos.z)
+		if (wall->GetX() == pos.x && wall->GetZ() == pos.z)
 		{
 			return true;
 		}
@@ -97,38 +117,38 @@ void Scene::generateMap()
 
 		if (!wallExistsAt(wallRoot))
 		{
-			walls.push_back(Obstacle(wallRoot.x, 0.5f, wallRoot.z));
+			walls.push_back(new Obstacle(wallRoot.x, 0.5f, wallRoot.z));
 		}
 
 		if (right)
 		{
 			if (!wallExistsAt(position(wallRoot.x + wallSize, wallRoot.z)))
 			{
-				walls.push_back(Obstacle(wallRoot.x + wallSize, 0.5f, wallRoot.z));
+				walls.push_back(new Obstacle(wallRoot.x + wallSize, 0.5f, wallRoot.z));
 			}
 
 			if (down)
 			{
 				if (!wallExistsAt(position(wallRoot.x + wallSize, wallRoot.z + wallSize)))
 				{
-					walls.push_back(Obstacle(wallRoot.x + wallSize, 0.5f, wallRoot.z + wallSize));
+					walls.push_back(new Obstacle(wallRoot.x + wallSize, 0.5f, wallRoot.z + wallSize));
 				}
 
 				if (!wallExistsAt(position(wallRoot.x, wallRoot.z + wallSize)))
 				{
-					walls.push_back(Obstacle(wallRoot.x, 0.5f, wallRoot.z + wallSize));
+					walls.push_back(new Obstacle(wallRoot.x, 0.5f, wallRoot.z + wallSize));
 				}
 			}
 			else
 			{
 				if (!wallExistsAt(position(wallRoot.x + wallSize, wallRoot.z - wallSize)))
 				{
-					walls.push_back(Obstacle(wallRoot.x + wallSize, 0.5f, wallRoot.z - wallSize));
+					walls.push_back(new Obstacle(wallRoot.x + wallSize, 0.5f, wallRoot.z - wallSize));
 				}
 
 				if (!wallExistsAt(position(wallRoot.x, wallRoot.z - wallSize)))
 				{
-					walls.push_back(Obstacle(wallRoot.x, 0.5f, wallRoot.z - wallSize));
+					walls.push_back(new Obstacle(wallRoot.x, 0.5f, wallRoot.z - wallSize));
 				}
 			}
 		}
@@ -136,31 +156,31 @@ void Scene::generateMap()
 		{
 			if (!wallExistsAt(position(wallRoot.x - wallSize, wallRoot.z)))
 			{
-				walls.push_back(Obstacle(wallRoot.x - wallSize, 0.5f, wallRoot.z));
+				walls.push_back(new Obstacle(wallRoot.x - wallSize, 0.5f, wallRoot.z));
 			}
 
 			if (down)
 			{
 				if (!wallExistsAt(position(wallRoot.x - wallSize, wallRoot.z + wallSize)))
 				{
-					walls.push_back(Obstacle(wallRoot.x - wallSize, 0.5f, wallRoot.z + wallSize));
+					walls.push_back(new Obstacle(wallRoot.x - wallSize, 0.5f, wallRoot.z + wallSize));
 				}
 
 				if (!wallExistsAt(position(wallRoot.x, wallRoot.z + wallSize)))
 				{
-					walls.push_back(Obstacle(wallRoot.x, 0.5f, wallRoot.z + wallSize));
+					walls.push_back(new Obstacle(wallRoot.x, 0.5f, wallRoot.z + wallSize));
 				}
 			}
 			else
 			{
 				if (!wallExistsAt(position(wallRoot.x - wallSize, wallRoot.z - wallSize)))
 				{
-					walls.push_back(Obstacle(wallRoot.x - wallSize, 0.5f, wallRoot.z - wallSize));
+					walls.push_back(new Obstacle(wallRoot.x - wallSize, 0.5f, wallRoot.z - wallSize));
 				}
 
 				if (!wallExistsAt(position(wallRoot.x, wallRoot.z - wallSize)))
 				{
-					walls.push_back(Obstacle(wallRoot.x, 0.5f, wallRoot.z - wallSize));
+					walls.push_back(new Obstacle(wallRoot.x, 0.5f, wallRoot.z - wallSize));
 				}
 			}
 		}
@@ -170,11 +190,10 @@ void Scene::generateMap()
 
 	for (auto wall : walls)
 	{
-		wall.SetOffset(m_ScenarioOffset);
+		wall->SetOffset(m_ScenarioOffset);
 	}
 }
 
-#include <iostream>
 void Scene::placePlayers(int numPlayers)
 {
 	//21 is mapWidth
@@ -184,28 +203,28 @@ void Scene::placePlayers(int numPlayers)
 	{
 		int count = 0;
 		position playerLoc = position(randomInRange(i * sliceWidth, i* sliceWidth + sliceWidth), randomInRange(i * sliceWidth, i* sliceWidth + sliceWidth));
-		Boid player = Boid(i, playerLoc);
+		Boid* player = new Boid(i, playerLoc);
 		for (int j = 0; j < walls.size(); j++)
 		{
 			Collision::MTV trans;
 			trans.direction = position();
 			trans.magnitude = 0;
 
-			if (Collision::collision(Collision::BoundingBox(playerLoc.x, playerLoc.z, 0.5, 0.5), walls.at(j).getBoundingBox(), trans))
+			if (Collision::collision(Collision::BoundingBox(playerLoc.x, playerLoc.z, 0.5, 0.5), walls.at(j)->getBoundingBox(), trans))
 			{
 				position mb = trans.direction * trans.magnitude;
-				player.resolveCollision(mb);
+				player->resolveCollision(mb);
 				j = 0;
-				
+				count++;
 				if (count > 20)
 				{
+					players.clear();
 					walls.clear();
 					generateMap();
+					delete player;
 					placePlayers(numPlayers);
 					return;
 				}
-
-				std::cout << count++ << std::endl;
 			}
 		}
 
@@ -224,7 +243,7 @@ void Scene::SetUpScenario()
 	placePlayers(2);
 }
 
-//--------------------------------------------------------------------------------------------------------
+//Render--------------------------------------------------------------------------------------------------
 
 void Scene::Render()
 {
@@ -234,36 +253,95 @@ void Scene::Render()
 	DrawScenario();
 }
 
-//--------------------------------------------------------------------------------------------------------
-
-void Scene::Update(int a_deltaTime)
-{
-	//Update the Scenario.
-
-	UpdateScenario(a_deltaTime);
-}
-
-//--------------------------------------------------------------------------------------------------------
-
 void Scene::DrawScenario()
 {
 	for (auto wall : walls)
 	{
-		wall.Render();
+		wall->Render();
 	}
 
 	for (auto player : players)
 	{
-		player.Render();
+		player->Render();
+	}
+
+	for (auto bullet : bullets)
+	{
+		bullet->Render();
 	}
 }
 
-//--------------------------------------------------------------------------------------------------------
+//Update--------------------------------------------------------------------------------------------------
+
+void Scene::Update(int a_deltaTime)
+{
+	//Update the Scenario.
+	UpdateScenario(a_deltaTime);
+}
 
 void Scene::UpdateScenario(int a_deltaTime)
 {
-	for (auto player : players)
+	keyboardUpdate(0);
+	for (int i = 0; i < players.size(); ++i)
 	{
-		player.Update(a_deltaTime);
+		
+		players.at(i)->Update(a_deltaTime);
+
+		for (int j = 0; j < walls.size(); j++)
+		{
+			Collision::MTV trans;
+			trans.direction = position();
+			trans.magnitude = 0;
+
+			if (Collision::collision(players.at(i)->getBoundingBox(), walls.at(j)->getBoundingBox(), trans))
+			{
+				position mb = trans.direction * trans.magnitude;
+				players.at(i)->resolveCollision(mb);
+			}
+		}
 	}
+
+	for (int i = 0; i < bullets.size(); ++i)
+	{
+		if (bullets.at(i)->Update(a_deltaTime, players, walls))
+		{
+			bullets[i] = bullets.back();
+			bullets.pop_back();
+		}
+	}
+}
+
+void Scene::keyboardUpdate(int thisPlayerIndex)
+{
+	//Builds up a string to be passed to the player which is used in the update
+	std::string pressedKeys = "";
+
+	if (GetAsyncKeyState('W'))
+	{
+		pressedKeys += "W";
+	}
+
+	if (GetAsyncKeyState('S'))
+	{
+		pressedKeys += "S";
+	}
+
+	if (GetAsyncKeyState('A'))
+	{
+		pressedKeys += "A";
+	}
+
+	if (GetAsyncKeyState('D'))
+	{
+		pressedKeys += "D";
+	}
+
+	if (GetAsyncKeyState(VK_SPACE) && timeSinceLastBullet > 100)
+	{
+		timeSinceLastBullet = 0;
+		pressedKeys += "F";
+	}
+	timeSinceLastBullet++;
+
+	players.at(thisPlayerIndex)->giveUpdateString(pressedKeys, bullets);
 }

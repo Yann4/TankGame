@@ -10,6 +10,7 @@
 #include "ObjectTypes.h"
 #include "Boid.h"
 #include "MathHelper.h"
+#include "Bullet.h"
 
 #include <vector>
 
@@ -17,9 +18,10 @@ class Scene
 {
 private:
 	position	 m_ScenarioOffset;
-	std::vector<Obstacle> walls;
-	std::vector<Boid> players;
-
+	std::vector<Obstacle*> walls;
+	std::vector<Boid*> players;
+	std::vector<Bullet*> bullets;
+	int timeSinceLastBullet = 0;
 
 public:
 	Scene();
@@ -36,7 +38,9 @@ private:
 	void	placePlayers(int numPlayers);
 
 	void	DrawScenario();
+
 	void    UpdateScenario(int a_deltaTime);
+	void	keyboardUpdate(int thisPlayerIndex);
 };
 
 #endif //_SCENE_H_

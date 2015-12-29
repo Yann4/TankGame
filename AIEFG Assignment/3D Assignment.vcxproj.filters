@@ -28,6 +28,9 @@
     <ClCompile Include="MathHelper.cpp">
       <Filter>Misc</Filter>
     </ClCompile>
+    <ClCompile Include="Bullet.cpp">
+      <Filter>Objects</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Boid.h">
@@ -59,6 +62,9 @@
     </ClInclude>
     <ClInclude Include="MathHelper.h">
       <Filter>Misc</Filter>
+    </ClInclude>
+    <ClInclude Include="Bullet.h">
+      <Filter>Objects</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

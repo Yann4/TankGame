@@ -36,7 +36,7 @@ private:
 	Client cInstance;
 	int playerIndex;
 
-	WORD latestUpdateTick;
+	unsigned long long latestUpdateTick;
 public:
 	Scene();
 	~Scene();

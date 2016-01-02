@@ -514,12 +514,12 @@ void Scene::UpdateFromServer(std::string state)
 			continue;
 		}
 
-		std::cout << token << std::endl;
 		if (token.at(0) == 'P')
 		{
 			int id = atoi(token.substr(2, 1).c_str());
 			position p = position(atof(token.substr(4, 6).c_str()), atof(token.substr(11, 6).c_str()));
 			float rotation = atof(token.substr(18, 6).c_str());
+			std::cout << token << std::endl;
 			players.at(id)->UpdateState(p, rotation);
 		}
 		else if (token.at(0) == 'B')
@@ -528,7 +528,6 @@ void Scene::UpdateFromServer(std::string state)
 			position p = position(atof(token.substr(5, 6).c_str()), atof(token.substr(12, 6).c_str()));
 			float rotation = atof(token.substr(19, 6).c_str());
 			
-			std::cout << p.x << ", " << p.z << std::endl;
 			for (Bullet* b : bullets)
 			{
 				if (b->getID() == id)
@@ -539,9 +538,10 @@ void Scene::UpdateFromServer(std::string state)
 		}
 		else if (token.at(0) == 'U')
 		{
-			WORD frameNumber = (WORD)atoi(token.substr(1, std::string::npos).c_str());
+			unsigned long long frameNumber = std::strtoull(token.substr(1, std::string::npos).c_str(), '\0', 10);
 			if (frameNumber < latestUpdateTick)
 			{
+				std::cout << "Throw away update" << std::endl;
 				break;
 			}
 			latestUpdateTick = frameNumber;
@@ -619,6 +619,6 @@ std::string Scene::serialiseCurrentState()
 	{
 		message += b->getInfoString() + "\\";
 	}
-
+	std::cout << message << std::endl;
 	return message;
 }

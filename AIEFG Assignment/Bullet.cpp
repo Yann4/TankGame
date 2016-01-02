@@ -7,17 +7,26 @@ Bullet::Bullet()
 	size = position();
 	colour = Colour();
 	rotation = 0;
+	lifetime = 0;
 }
 
-Bullet::Bullet(position pos, position vel) : pos(pos), velocity(vel)
+Bullet::Bullet(int id, position pos, position vel) : pos(pos), velocity(vel), id(id)
 {
 	size = position(1, 0.5);
 	colour = Colour();
 
 	position heading = normalise(velocity);
 	rotation = atan2(-heading.z, heading.x) * 180 / M_PI;
+	lifetime = 0;
 }
 
+void Bullet::UpdateState(position p, float rot)
+{
+	pos = p;
+	rotation = rot;
+}
+
+//Returns true if the bullet should be removed
 bool Bullet::Update(float delta, std::vector<Boid*>& players, std::vector<Obstacle*>& walls)
 {
 	pos += velocity / delta;
@@ -41,6 +50,12 @@ bool Bullet::Update(float delta, std::vector<Boid*>& players, std::vector<Obstac
 			return true;
 		}
 	}
+
+	if (++lifetime >= 200)
+	{
+		return true;
+	}
+
 	return false;
 }
 

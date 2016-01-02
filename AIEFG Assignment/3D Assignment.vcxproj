@@ -69,7 +69,7 @@
       <DataExecutionPrevention>
       </DataExecutionPrevention>
       <TargetMachine>MachineX86</TargetMachine>
-      <AdditionalDependencies>kernel32.lib;glut32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Ws2_32.lib;kernel32.lib;glut32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -94,27 +94,36 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Actions.cpp" />
     <ClCompile Include="Boid.cpp" />
     <ClCompile Include="Bullet.cpp" />
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="Client.cpp" />
     <ClCompile Include="Collision.cpp" />
     <ClCompile Include="MathHelper.cpp" />
     <ClCompile Include="Obstacle.cpp" />
     <ClCompile Include="Program.cpp" />
     <ClCompile Include="Scene.cpp" />
+    <ClCompile Include="Server.cpp" />
+    <ClCompile Include="Socket.cpp" />
     <ClCompile Include="Viewer.cpp" />
     <ClCompile Include="Worldmanager.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Actions.h" />
     <ClInclude Include="Boid.h" />
     <ClInclude Include="Bullet.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="Client.h" />
     <ClInclude Include="Collision.h" />
     <ClInclude Include="Enums.h" />
     <ClInclude Include="MathHelper.h" />
     <ClInclude Include="ObjectTypes.h" />
     <ClInclude Include="Obstacle.h" />
     <ClInclude Include="Scene.h" />
+    <ClInclude Include="Server.h" />
+    <ClInclude Include="Socket.h" />
+    <ClInclude Include="Structs.h" />
     <ClInclude Include="Viewer.h" />
     <ClInclude Include="Worldmanager.h" />
   </ItemGroup>

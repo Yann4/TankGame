@@ -42,13 +42,13 @@ private:
 	position velocity;
 	float maxVelocity = 1.0f;
 
-	//Display/collision information info
 	float rotation;
 	float turnSpeed = 3.0f;
 
 	Colour colour;
 
 	float width, height;
+	float bulletIndex = 0;
 public:
 	Boid();
 	Boid(int id, position pos);
@@ -56,13 +56,21 @@ public:
 
 	void Update(float delta);
 	void Render();
-	
+
+	void UpdateState(position p, float rotation);
+
 	void resolveCollision(position moveBy);
 
 	Collision::BoundingBox getBoundingBox() { return Collision::BoundingBox(pos.x, pos.z, width, height); }
 	BoidInfo getInfo() { return BoidInfo(id, pos, velocity, isTarget); }
+	
+	//Format is: "P:[id],[xPos],[zPos],[rotation]"
+	std::string getInfoString() {
+		return "P:" + std::to_string(id) + "," + std::to_string(pos.x).substr(0, 6) + "," + std::to_string(pos.z).substr(0, 6)
+			+ "," + std::to_string(rotation).substr(0, 6);
+	}
 
 	void giveUpdateString(std::string actions, std::vector<Bullet*>& bullets);
-
+	
 	void hitByBullet();
 };

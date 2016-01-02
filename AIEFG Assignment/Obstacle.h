@@ -1,9 +1,10 @@
 #ifndef _OBSTACLE_H_
 #define _OBSTACLE_H_
-
+#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 //#include "../3dsLoader/3dsLoader.h"
 #include "ObjectTypes.h"
+#include <stdlib.h>
 #include "gl/glut.h"
 #include <string>
 #include "Collision.h"

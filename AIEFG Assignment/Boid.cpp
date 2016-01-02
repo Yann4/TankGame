@@ -34,8 +34,15 @@ Boid::Boid(int id, position pos) : id(id), pos(pos)
 void Boid::Update(float delta)
 {
 	delta = 16;
-	pos += velocity / delta;
+	velocity /= delta;
+	pos += velocity;
 	velocity = position(0, 0);
+}
+
+void Boid::UpdateState(position p, float rot)
+{
+	pos = p;
+	rotation = rot;
 }
 
 void Boid::Render()
@@ -61,18 +68,40 @@ void Boid::giveUpdateString(std::string actions, std::vector<Bullet*>& bullets)
 		rotation += turnSpeed;
 	}
 
+	if (rotation >= 360)
+	{
+		rotation -= 360;
+	}
+
 	if (actions.find("W") != std::string::npos)
 	{
 		//Move forward
 		float rot = -(rotation * M_PI / 180);
 		velocity = position(cos(rot), sin(rot));
+		if (fabs(velocity.x) < 0.000001f)
+		{
+			velocity.x = 0;
+		}
+		if (fabs(velocity.z) < 0.000001f)
+		{
+			velocity.z = 0;
+		}
 		velocity = normalise(velocity) * maxVelocity;
 	}
 	if (actions.find("S") != std::string::npos)
 	{
 		//Move backwards
-		float rot = -(rotation * M_PI / 180);
-		velocity = position(cos(M_PI + rot), sin(M_PI + rot));
+		float rot = -(rotation * M_PI / 180) + M_PI;
+		
+		velocity = position(cos(rot), sin(rot));
+		if (fabs(velocity.x) < 0.000001f)
+		{
+			velocity.x = 0;
+		}
+		if (fabs(velocity.z) < 0.000001f)
+		{
+			velocity.z = 0;
+		}
 		velocity = normalise(velocity) * maxVelocity;
 	}
 
@@ -82,7 +111,12 @@ void Boid::giveUpdateString(std::string actions, std::vector<Bullet*>& bullets)
 		float rot = -(rotation * M_PI / 180);
 		position bVel = position(cos(rot), sin(rot));
 		bVel = normalise(bVel) * maxVelocity * 2;
-		bullets.push_back(new Bullet(pos + normalise(bVel), bVel));
+		bullets.push_back(new Bullet(id * 10 + bulletIndex++, pos + normalise(bVel), bVel));
+
+		if (bulletIndex > 9)
+		{
+			bulletIndex = 0;
+		}
 	}
 }
 

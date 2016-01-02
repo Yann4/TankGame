@@ -1,7 +1,7 @@
 #include "Scene.h"
 #include "gl/gl.h"
 #include "gl/glu.h"
-#include <string>
+
 
 //--------------------------------------------------------------------------------------------------------
 
@@ -43,9 +43,48 @@ Scene::~Scene()
 
 //Initialise----------------------------------------------------------------------------------------------
 
+void Scene::setupProgram()
+{
+	std::cout << "Setup as server or client? (S/C): ";
+	std::string input;
+	
+	bool set = false;
+	while (!set)
+	{
+		std::cin >> input;
+		if (input.find("S") != std::string::npos || input.find("s") != std::string::npos)
+		{
+			server = true;
+			set = true;
+		}
+		else if (input.find("C") != std::string::npos || input.find("c") != std::string::npos)
+		{
+			server = false;
+			set = true;
+		}
+	}
+
+	if (!server)
+	{
+		std::cout << "Enter server name: ";
+		std::string name;
+		std::cin >> name;
+		std::cout << "Enter port number: ";
+		std::cin >> input;
+		
+		cInstance.Initialise(name, input);
+	}
+	else
+	{
+		sInstance.turnOn();
+	}
+}
+
 bool Scene::Initialise()
 {
 	glEnable(GL_DEPTH_TEST);
+
+	setupProgram();
 
 	SetUpScenario();
 
@@ -238,9 +277,93 @@ void Scene::SetUpScenario()
 	m_ScenarioOffset.x = 0.0f;
 	m_ScenarioOffset.z = 0.0f;
 
-	generateMap();
+	if (server)
+	{
+		generateMap();
+		placePlayers(2);
+		std::string mess = serialiseInitialState();
+		sInstance.setWelcomeMessage(mess);
+		sInstance.broadcast(Message(mess, -1));
+	}else
+	{
+		int initialised = 0;
+		while (initialised < 2)
+		{
+			std::string initialiseMessage;
+			auto messages = cInstance.getMessages();
+			//recieve string to pass to this function
 
-	placePlayers(2);
+			while (!messages.empty())
+			{
+				std::string message = messages.front();
+				messages.pop();
+				if (!message.empty() && message.find("\\I\\") != std::string::npos)
+				{
+					setUpFromExtern(message);
+					initialised++;
+				}
+
+				if (!message.empty() && message.find("ID") != std::string::npos)
+				{
+					playerIndex = atoi(message.substr(message.find("ID") + 3, 1).c_str());
+					initialised++;
+				}
+			}	
+		}
+	}
+}
+
+std::vector<std::string> split(const std::string &s, char delim) 
+{
+	std::vector<std::string> elems;
+
+	std::stringstream ss(s);
+	std::string item;
+	
+	while (std::getline(ss, item, delim)) {
+		elems.push_back(item);
+	}
+
+	return elems;
+}
+
+void Scene::setUpFromExtern(std::string state)
+{
+	std::vector<std::string> tokens = split(state, '\\');
+	
+	for (auto w : walls)
+	{
+		delete w;
+	}
+	walls.clear();
+
+	for (auto p : players)
+	{
+		delete p;
+	}
+	players.clear();
+
+	for (std::string token : tokens)
+	{
+		if (token.empty())
+		{
+			continue;
+		}
+		
+		//Format of wall token is "W:[PosX],[PosZ]\" where posx and posz are both 4 characters long
+		//This means that posX starts at position 2 and posZ starts at position 7 in the substring
+		if (token.at(0) == 'W')
+		{
+			walls.push_back(new Obstacle(atof(token.substr(2, 4).c_str()), 0.5, atof(token.substr(7, 4).c_str())));
+		}
+		//"P:[id],[xPos],[zPos],[rotation]"
+		//Initial state of player is at rotation 0, so can ignore that part of the string
+		if (token.at(0) == 'P')
+		{
+			std::cout << token << std::endl;
+			players.push_back(new Boid(atoi(token.substr(2, 1).c_str()), position((float)atof(token.substr(4, 6).c_str()), (float)atof(token.substr(11, 4).c_str()))));
+		}
+	}
 }
 
 //Render--------------------------------------------------------------------------------------------------
@@ -277,15 +400,77 @@ void Scene::Update(int a_deltaTime)
 {
 	//Update the Scenario.
 	UpdateScenario(a_deltaTime);
+
+	if (server)
+	{
+		sInstance.broadcast(Message(serialiseCurrentState(), -1));
+	}
+	else
+	{
+		auto messages = cInstance.getMessages();
+		std::string latestUpdate;
+
+		while (!messages.empty())
+		{
+			latestUpdate = messages.front();
+			messages.pop();			
+		}
+		if (!latestUpdate.empty())
+		{
+			UpdateFromServer(latestUpdate);
+		}
+		cInstance.update();
+	}
+	
 }
 
 void Scene::UpdateScenario(int a_deltaTime)
 {
-	keyboardUpdate(0);
+	if (!server)
+	{
+		std::string input = keyboardUpdate(playerIndex);
+		if (!input.empty())
+		{
+			cInstance.pushMessage(input);
+		}
+	}
+	else
+	{
+		std::queue<std::string> playerInputs = sInstance.getMessages();
+
+		while (!playerInputs.empty())
+		{
+			std::string inputString = playerInputs.front();
+			int index = atoi(inputString.substr(0, 1).c_str());
+			players.at(index)->giveUpdateString(inputString.substr(2, std::string::npos), bullets);
+			playerInputs.pop();
+		}
+	}
+
 	for (int i = 0; i < players.size(); ++i)
 	{
 		
 		players.at(i)->Update(a_deltaTime);
+		
+		//Make sure stays on screen. Should definitely be prettier - not very extensible
+		position pPos = players.at(i)->getInfo().pos;
+		if (pPos.x >= 21)
+		{
+			players.at(i)->resolveCollision(position(21 - pPos.x, 0));
+		}
+		if (pPos.x <= 0)
+		{
+			players.at(i)->resolveCollision(position(-pPos.x, 0));
+		}
+
+		if (pPos.z >= 21)
+		{
+			players.at(i)->resolveCollision(position(0, 21 - pPos.z));
+		}
+		if (pPos.z <= 0)
+		{
+			players.at(i)->resolveCollision(position(0, -pPos.z));
+		}
 
 		for (int j = 0; j < walls.size(); j++)
 		{
@@ -311,7 +496,42 @@ void Scene::UpdateScenario(int a_deltaTime)
 	}
 }
 
-void Scene::keyboardUpdate(int thisPlayerIndex)
+void Scene::UpdateFromServer(std::string state)
+{
+	std::vector<std::string> tokens = split(state, '\\');
+
+	for (std::string token : tokens)
+	{
+		if (token.empty())
+		{
+			continue;
+		}
+
+		if (token.at(0) == 'P')
+		{
+			int id = atoi(token.substr(2, 1).c_str());
+			position p = position(atof(token.substr(4, 6).c_str()), atof(token.substr(11, 6).c_str()));
+			float rotation = atof(token.substr(18, 6).c_str());
+			players.at(id)->UpdateState(p, rotation);
+		}
+		else if (token.at(0) == 'B')
+		{
+			int id = atoi(token.substr(2, 2).c_str());
+			position p = position(atof(token.substr(5, 4).c_str()), atof(token.substr(10, 4).c_str()));
+			float rotation = atof(token.substr(15, 6).c_str());
+
+			for (Bullet* b : bullets)
+			{
+				if (b->getID() == id)
+				{
+					b->UpdateState(p, rotation);
+				}
+			}
+		}
+	}
+}
+
+std::string Scene::keyboardUpdate(int thisPlayerIndex)
 {
 	//Builds up a string to be passed to the player which is used in the update
 	std::string pressedKeys = "";
@@ -339,9 +559,46 @@ void Scene::keyboardUpdate(int thisPlayerIndex)
 	if (GetAsyncKeyState(VK_SPACE) && timeSinceLastBullet > 100)
 	{
 		timeSinceLastBullet = 0;
-		pressedKeys += "F";
+		pressedKeys += "F";		
 	}
 	timeSinceLastBullet++;
 
 	players.at(thisPlayerIndex)->giveUpdateString(pressedKeys, bullets);
+
+	return pressedKeys;
+}
+
+std::string Scene::serialiseInitialState()
+{
+	std::string message = "\\I\\";
+
+	//Wall data in format "\W:xx.x,zz.z\"
+	for (Obstacle* w : walls)
+	{
+		message += "W:" + std::to_string(w->GetX()).substr(0, 4) + "," + std::to_string(w->GetZ()).substr(0, 4) + "\\";
+	}
+
+	for (Boid* p : players)
+	{
+		message += p->getInfoString() + "\\";
+	}
+
+	return message;
+}
+
+std::string Scene::serialiseCurrentState()
+{
+	std::string message = "\\";
+
+	for (Boid* p : players)
+	{
+		message += p->getInfoString() + "\\";
+	}
+
+	for (Bullet* b : bullets)
+	{
+		message += b->getInfoString() + "\\";
+	}
+
+	return message;
 }

@@ -1,5 +1,6 @@
 #ifndef _CAMERA_H_
 #define _CAMERA_H_
+#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include "gl/glut.h"
 #include "Enums.h"

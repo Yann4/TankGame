@@ -1,8 +1,10 @@
 #ifndef _SCENE_H_
 #define _SCENE_H_
 
+#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <cstdio>
+#include <stdlib.h>
 #include <GL\gl.h>
 #include <GL\glu.h>
 #include "gl/glut.h"
@@ -12,7 +14,13 @@
 #include "MathHelper.h"
 #include "Bullet.h"
 
+#include "Server.h"
+#include "Client.h"
+
 #include <vector>
+#include <string>
+#include <sstream>
+#include <iostream>
 
 class Scene
 {
@@ -23,6 +31,11 @@ private:
 	std::vector<Bullet*> bullets;
 	int timeSinceLastBullet = 0;
 
+	bool server;
+	Server sInstance;
+	Client cInstance;
+	int playerIndex;
+
 public:
 	Scene();
 	~Scene();
@@ -32,7 +45,9 @@ public:
 	void	Update(int a_deltaTime);								
 	
 private:
+	void	setupProgram();
 	void	SetUpScenario();
+	void	setUpFromExtern(std::string state);
 	bool	wallExistsAt(position pos);
 	void	generateMap();
 	void	placePlayers(int numPlayers);
@@ -40,7 +55,11 @@ private:
 	void	DrawScenario();
 
 	void    UpdateScenario(int a_deltaTime);
-	void	keyboardUpdate(int thisPlayerIndex);
+	void	UpdateFromServer(std::string state);
+	std::string	keyboardUpdate(int thisPlayerIndex);
+
+	std::string	serialiseInitialState();
+	std::string serialiseCurrentState();
 };
 
 #endif //_SCENE_H_

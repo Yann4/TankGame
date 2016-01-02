@@ -1,3 +1,4 @@
+#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include "Enums.h"
 #include "Worldmanager.h"
@@ -23,7 +24,7 @@ int main(int argc, char **argv)
 	myViewer->Init(argc, argv);
 	myViewer->InitWorld();
 	myViewer->SetValue(BUFFER, MDOUBLE);
-	myViewer->CreateWin("AIEFG Assignment", 1000, 700);
+	myViewer->CreateWin("Multiplayer Assignment", 1000, 700);
 	myViewer->InitCamera();
 	myViewer->Show();
 

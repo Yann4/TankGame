@@ -15,6 +15,8 @@ Scene::Scene()
 	walls = std::vector<Obstacle*>();
 	players = std::vector<Boid*>();
 
+	latestUpdateTick = 0;
+
 	return;
 }
 
@@ -413,11 +415,12 @@ void Scene::Update(int a_deltaTime)
 		while (!messages.empty())
 		{
 			latestUpdate = messages.front();
-			messages.pop();			
-		}
-		if (!latestUpdate.empty())
-		{
-			UpdateFromServer(latestUpdate);
+			messages.pop();
+
+			if (!latestUpdate.empty())
+			{
+				UpdateFromServer(latestUpdate);
+			}
 		}
 		cInstance.update();
 	}
@@ -431,7 +434,7 @@ void Scene::UpdateScenario(int a_deltaTime)
 		std::string input = keyboardUpdate(playerIndex);
 		if (!input.empty())
 		{
-			cInstance.pushMessage(input);
+			cInstance.pushMessage("K:" + input);
 		}
 	}
 	else
@@ -441,9 +444,13 @@ void Scene::UpdateScenario(int a_deltaTime)
 		while (!playerInputs.empty())
 		{
 			std::string inputString = playerInputs.front();
-			int index = atoi(inputString.substr(0, 1).c_str());
-			players.at(index)->giveUpdateString(inputString.substr(2, std::string::npos), bullets);
 			playerInputs.pop();
+			int index = atoi(inputString.substr(0, 1).c_str());
+
+			if (inputString.find("K:") != std::string::npos)
+			{
+				players.at(index)->giveUpdateString(inputString.substr(5, std::string::npos), bullets);
+			}
 		}
 	}
 
@@ -507,6 +514,7 @@ void Scene::UpdateFromServer(std::string state)
 			continue;
 		}
 
+		std::cout << token << std::endl;
 		if (token.at(0) == 'P')
 		{
 			int id = atoi(token.substr(2, 1).c_str());
@@ -517,9 +525,10 @@ void Scene::UpdateFromServer(std::string state)
 		else if (token.at(0) == 'B')
 		{
 			int id = atoi(token.substr(2, 2).c_str());
-			position p = position(atof(token.substr(5, 4).c_str()), atof(token.substr(10, 4).c_str()));
-			float rotation = atof(token.substr(15, 6).c_str());
-
+			position p = position(atof(token.substr(5, 6).c_str()), atof(token.substr(12, 6).c_str()));
+			float rotation = atof(token.substr(19, 6).c_str());
+			
+			std::cout << p.x << ", " << p.z << std::endl;
 			for (Bullet* b : bullets)
 			{
 				if (b->getID() == id)
@@ -527,6 +536,15 @@ void Scene::UpdateFromServer(std::string state)
 					b->UpdateState(p, rotation);
 				}
 			}
+		}
+		else if (token.at(0) == 'U')
+		{
+			WORD frameNumber = (WORD)atoi(token.substr(1, std::string::npos).c_str());
+			if (frameNumber < latestUpdateTick)
+			{
+				break;
+			}
+			latestUpdateTick = frameNumber;
 		}
 	}
 }
@@ -588,7 +606,9 @@ std::string Scene::serialiseInitialState()
 
 std::string Scene::serialiseCurrentState()
 {
-	std::string message = "\\";
+	std::string message = "\\U";
+
+	message += std::to_string(GetTickCount64()) + "\\";
 
 	for (Boid* p : players)
 	{

@@ -30,9 +30,9 @@ public:
 	void Render();
 
 	//"B:[ID],[PosX],[PosZ],[Rotation]"
-	//B:[2chars],[4chars],[4chars],[6chars]
+	//B:[2chars],[6chars],[6chars],[6chars]
 	std::string getInfoString() {
-		return "B:" + Actions::intToFLString(id, 2) + "," + std::to_string(pos.x).substr(0, 4) + "," + std::to_string(pos.x).substr(0, 4)
+		return "B:" + Actions::intToFLString(id, 2) + "," + std::to_string(pos.x).substr(0, 6) + "," + std::to_string(pos.z).substr(0, 6)
 			+ "," + std::to_string(rotation).substr(0, 6);
 	}
 

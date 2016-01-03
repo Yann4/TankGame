@@ -17,6 +17,7 @@ Scene::Scene()
 
 	latestUpdateTick = 0;
 	textMode = false;
+	typedString = "";
 	return;
 }
 
@@ -362,7 +363,6 @@ void Scene::setUpFromExtern(std::string state)
 		//Initial state of player is at rotation 0, so can ignore that part of the string
 		if (token.at(0) == 'P')
 		{
-			std::cout << token << std::endl;
 			players.push_back(new Boid(atoi(token.substr(2, 1).c_str()), position((float)atof(token.substr(4, 6).c_str()), (float)atof(token.substr(11, 4).c_str()))));
 		}
 	}
@@ -398,7 +398,7 @@ void Scene::DrawScenario()
 	int lines = 0;
 	position textPos = position(0.6, 0.9); //In screen coordinates -1 to 1, (0,0) being the centre of the screen
 
-	for (int i = chat.size() - 1; i > 0; i--)
+	for (int i = chat.size() - 1; i >= 0; i--)
 	{
 		int thisOne = DrawString(chat.at(i), textPos);
 		lines += thisOne;
@@ -410,6 +410,7 @@ void Scene::DrawScenario()
 		}
 	}
 	
+	DrawString(typedString, position(-0.1, -0.3));
 }
 
 int Scene::DrawString(std::string text, position pos)
@@ -503,16 +504,21 @@ void Scene::UpdateScenario(double a_deltaTime)
 {
 	if (!server)
 	{
-		std::string input = keyboardUpdate(playerIndex);
-		if (!input.empty() && !textMode)
+		if (!textMode)
 		{
-			cInstance.pushMessage("K:" + input);
+			std::string input = keyboardUpdate(playerIndex);
+			if (!input.empty() && !textMode)
+			{
+				cInstance.pushMessage("K:" + input);
+			}
 		}
-		else if(!input.empty())
+		else
 		{
-			textMode = false;
-			chat.push_back(input);
-			cInstance.pushMessage("M:" + input);
+			if (!type() && !typedString.empty())
+			{
+				cInstance.pushMessage("M:" + typedString);
+				typedString = "";
+			}
 		}
 	}
 	else
@@ -533,13 +539,14 @@ void Scene::UpdateScenario(double a_deltaTime)
 			{
 				std::string text = inputString.substr(0, 2) + inputString.substr(inputString.find("M:") + 2, std::string::npos);
 				chat.push_back(text);
+
+				sInstance.broadcast(Message("M:" + text, -1));
 			}
 		}
 	}
 
 	for (int i = 0; i < players.size(); ++i)
 	{
-		
 		players.at(i)->Update(a_deltaTime);
 		
 		//Make sure stays on screen. Should definitely be prettier - not very extensible
@@ -597,12 +604,12 @@ void Scene::UpdateFromServer(std::string state)
 			continue;
 		}
 
-		if (token.at(0) == 'P')
+		std::regex playerUpdate("P:[0-9],[0-9]+.[0-9]+,[0-9]+.[0-9]+,[0-9]+.[0-9]+");
+		if (std::regex_match(token, playerUpdate))
 		{
 			int id = atoi(token.substr(2, 1).c_str());
 			position p = position(atof(token.substr(4, 6).c_str()), atof(token.substr(11, 6).c_str()));
 			float rotation = atof(token.substr(18, 6).c_str());
-			std::cout << token << std::endl;
 			players.at(id)->UpdateState(p, rotation);
 		}
 		else if (token.at(0) == 'B')
@@ -624,10 +631,13 @@ void Scene::UpdateFromServer(std::string state)
 			unsigned long long frameNumber = std::strtoull(token.substr(1, std::string::npos).c_str(), '\0', 10);
 			if (frameNumber < latestUpdateTick)
 			{
-				std::cout << "Throw away update" << std::endl;
 				break;
 			}
 			latestUpdateTick = frameNumber;
+		}
+		else if (token.find("M:") != std::string::npos)
+		{
+			chat.push_back(token.substr(token.find("M:") + 2, std::string::npos));
 		}
 	}
 }
@@ -636,49 +646,396 @@ std::string Scene::keyboardUpdate(int thisPlayerIndex)
 {
 	//Builds up a string to be passed to the player which is used in the update
 	std::string pressedKeys = "";
-
-	if (!textMode)
+	if (GetAsyncKeyState('W') || GetAsyncKeyState(VK_UP))
 	{
-		if (GetAsyncKeyState('W') || GetAsyncKeyState(VK_UP))
-		{
-			pressedKeys += "W";
-		}
-
-		if (GetAsyncKeyState('S') || GetAsyncKeyState(VK_DOWN))
-		{
-			pressedKeys += "S";
-		}
-
-		if (GetAsyncKeyState('A') || GetAsyncKeyState(VK_LEFT))
-		{
-			pressedKeys += "A";
-		}
-
-		if (GetAsyncKeyState('D') || GetAsyncKeyState(VK_RIGHT))
-		{
-			pressedKeys += "D";
-		}
-
-		if (GetAsyncKeyState(VK_SPACE) && timeSinceLastBullet > 100)
-		{
-			timeSinceLastBullet = 0;
-			pressedKeys += "F";
-		}
-		timeSinceLastBullet++;
-
-		if (GetAsyncKeyState(VK_RETURN))
-		{
-			textMode = true;
-			return "";
-		}
-
-		players.at(thisPlayerIndex)->giveUpdateString(pressedKeys, bullets);
+		pressedKeys += "W";
 	}
-	else
+
+	if (GetAsyncKeyState('S') || GetAsyncKeyState(VK_DOWN))
 	{
-		getline(std::cin, pressedKeys);
+		pressedKeys += "S";
 	}
+
+	if (GetAsyncKeyState('A') || GetAsyncKeyState(VK_LEFT))
+	{
+		pressedKeys += "A";
+	}
+
+	if (GetAsyncKeyState('D') || GetAsyncKeyState(VK_RIGHT))
+	{
+		pressedKeys += "D";
+	}
+
+	if (GetAsyncKeyState(VK_SPACE) && timeSinceLastBullet > 100)
+	{
+		timeSinceLastBullet = 0;
+		pressedKeys += "F";
+	}
+	timeSinceLastBullet++;
+
+	if (GetAsyncKeyState(VK_RETURN) & 0x0001)
+	{
+		textMode = true;
+		return "E";
+	}
+
+	players.at(thisPlayerIndex)->giveUpdateString(pressedKeys, bullets);
+
 	return pressedKeys;
+}
+
+bool Scene::type()
+{
+	if (GetAsyncKeyState(VK_SPACE) & 0x0001)
+	{
+		typedString += ' ';
+	}
+
+	if (GetAsyncKeyState(VK_BACK) & 0x001)
+	{
+		typedString.pop_back();
+	}
+
+	if (GetAsyncKeyState(VK_OEM_PERIOD) & 0x0001)
+	{
+		typedString += '.';
+	}
+
+	if (GetAsyncKeyState(VK_OEM_COMMA) & 0x0001)
+	{
+		typedString += ',';
+	}
+
+	if (GetAsyncKeyState(VK_OEM_2) & 0x0001)
+	{
+		if (GetAsyncKeyState(VK_SHIFT))
+		{
+			typedString += '?';
+		}
+		else
+		{
+			typedString += '/';
+		}
+	}
+
+	if (GetAsyncKeyState('A') & 0x0001)
+	{
+		if (GetAsyncKeyState(VK_SHIFT))
+		{
+			typedString += 'A';
+		}
+		else
+		{
+			typedString += 'a';
+		}
+	}
+
+	if (GetAsyncKeyState('B') & 0x0001)
+	{
+		if (GetAsyncKeyState(VK_SHIFT))
+		{
+			typedString += 'B';
+		}
+		else
+		{
+			typedString += 'b';
+		}
+	}
+
+	if (GetAsyncKeyState('C') & 0x0001)
+	{
+		if (GetAsyncKeyState(VK_SHIFT))
+		{
+			typedString += 'C';
+		}
+		else
+		{
+			typedString += 'c';
+		}
+	}
+
+	if (GetAsyncKeyState('D') & 0x0001)
+	{
+		if (GetAsyncKeyState(VK_SHIFT))
+		{
+			typedString += 'D';
+		}
+		else
+		{
+			typedString += 'd';
+		}
+	}
+
+	if (GetAsyncKeyState('E') & 0x0001)
+	{
+		if (GetAsyncKeyState(VK_SHIFT))
+		{
+			typedString += 'E';
+		}
+		else
+		{
+			typedString += 'e';
+		}
+	}
+
+	if (GetAsyncKeyState('F') & 0x0001)
+	{
+		if (GetAsyncKeyState(VK_SHIFT))
+		{
+			typedString += 'F';
+		}
+		else
+		{
+			typedString += 'f';
+		}
+	}
+
+	if (GetAsyncKeyState('G') & 0x0001)
+	{
+		if (GetAsyncKeyState(VK_SHIFT))
+		{
+			typedString += 'G';
+		}
+		else
+		{
+			typedString += 'g';
+		}
+	}
+
+	if (GetAsyncKeyState('H') & 0x0001)
+	{
+		if (GetAsyncKeyState(VK_SHIFT))
+		{
+			typedString += 'H';
+		}
+		else
+		{
+			typedString += 'h';
+		}
+	}
+
+	if (GetAsyncKeyState('I') & 0x0001)
+	{
+		if (GetAsyncKeyState(VK_SHIFT))
+		{
+			typedString += 'I';
+		}
+		else
+		{
+			typedString += 'i';
+		}
+	}
+
+	if (GetAsyncKeyState('J') & 0x0001)
+	{
+		if (GetAsyncKeyState(VK_SHIFT))
+		{
+			typedString += 'J';
+		}
+		else
+		{
+			typedString += 'j';
+		}
+	}
+
+	if (GetAsyncKeyState('K') & 0x0001)
+	{
+		if (GetAsyncKeyState(VK_SHIFT))
+		{
+			typedString += 'K';
+		}
+		else
+		{
+			typedString += 'k';
+		}
+	}
+
+	if (GetAsyncKeyState('L') & 0x0001)
+	{
+		if (GetAsyncKeyState(VK_SHIFT))
+		{
+			typedString += 'L';
+		}
+		else
+		{
+			typedString += 'l';
+		}
+	}
+
+	if (GetAsyncKeyState('M') & 0x0001)
+	{
+		if (GetAsyncKeyState(VK_SHIFT))
+		{
+			typedString += 'M';
+		}
+		else
+		{
+			typedString += 'm';
+		}
+	}
+
+	if (GetAsyncKeyState('N') & 0x0001)
+	{
+		if (GetAsyncKeyState(VK_SHIFT))
+		{
+			typedString += 'N';
+		}
+		else
+		{
+			typedString += 'n';
+		}
+	}
+
+	if (GetAsyncKeyState('O') & 0x0001)
+	{
+		if (GetAsyncKeyState(VK_SHIFT))
+		{
+			typedString += 'O';
+		}
+		else
+		{
+			typedString += 'o';
+		}
+	}
+
+	if (GetAsyncKeyState('P') & 0x0001)
+	{
+		if (GetAsyncKeyState(VK_SHIFT))
+		{
+			typedString += 'P';
+		}
+		else
+		{
+			typedString += 'p';
+		}
+	}
+
+	if (GetAsyncKeyState('Q') & 0x0001)
+	{
+		if (GetAsyncKeyState(VK_SHIFT))
+		{
+			typedString += 'Q';
+		}
+		else
+		{
+			typedString += 'q';
+		}
+	}
+
+	if (GetAsyncKeyState('R') & 0x0001)
+	{
+		if (GetAsyncKeyState(VK_SHIFT))
+		{
+			typedString += 'R';
+		}
+		else
+		{
+			typedString += 'r';
+		}
+	}
+
+	if (GetAsyncKeyState('S') & 0x0001)
+	{
+		if (GetAsyncKeyState(VK_SHIFT))
+		{
+			typedString += 'S';
+		}
+		else
+		{
+			typedString += 's';
+		}
+	}
+
+	if (GetAsyncKeyState('T') & 0x0001)
+	{
+		if (GetAsyncKeyState(VK_SHIFT))
+		{
+			typedString += 'T';
+		}
+		else
+		{
+			typedString += 't';
+		}
+	}
+
+	if (GetAsyncKeyState('U') & 0x0001)
+	{
+		if (GetAsyncKeyState(VK_SHIFT))
+		{
+			typedString += 'U';
+		}
+		else
+		{
+			typedString += 'u';
+		}
+	}
+
+	if (GetAsyncKeyState('V') & 0x0001)
+	{
+		if (GetAsyncKeyState(VK_SHIFT))
+		{
+			typedString += 'V';
+		}
+		else
+		{
+			typedString += 'v';
+		}
+	}
+
+	if (GetAsyncKeyState('W') & 0x0001)
+	{
+		if (GetAsyncKeyState(VK_SHIFT))
+		{
+			typedString += 'W';
+		}
+		else
+		{
+			typedString += 'w';
+		}
+	}
+
+	if (GetAsyncKeyState('X') & 0x0001)
+	{
+		if (GetAsyncKeyState(VK_SHIFT))
+		{
+			typedString += 'X';
+		}
+		else
+		{
+			typedString += 'a';
+		}
+	}
+
+	if (GetAsyncKeyState('Y') & 0x0001)
+	{
+		if (GetAsyncKeyState(VK_SHIFT))
+		{
+			typedString += 'Y';
+		}
+		else
+		{
+			typedString += 'y';
+		}
+	}
+
+	if (GetAsyncKeyState('Z') & 0x0001)
+	{
+		if (GetAsyncKeyState(VK_SHIFT))
+		{
+			typedString += 'Z';
+		}
+		else
+		{
+			typedString += 'z';
+		}
+	}
+
+	if (GetAsyncKeyState(VK_RETURN) & 0x0001)
+	{
+		textMode = false;
+		return false;
+	}
+	return true;
 }
 
 std::string Scene::serialiseInitialState()
@@ -714,6 +1071,5 @@ std::string Scene::serialiseCurrentState()
 	{
 		message += b->getInfoString() + "\\";
 	}
-	std::cout << message << std::endl;
 	return message;
 }

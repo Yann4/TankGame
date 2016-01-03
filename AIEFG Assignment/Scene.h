@@ -21,6 +21,7 @@
 #include <string>
 #include <sstream>
 #include <iostream>
+#include <regex>
 
 class Scene
 {
@@ -34,6 +35,7 @@ private:
 	std::vector<std::string> chat;
 	int numLines = 15;
 	bool textMode;
+	std::string typedString;
 
 	bool server;
 	Server sInstance;
@@ -61,6 +63,7 @@ private:
 
 	//Returns the number of lines drawn
 	int		DrawString(std::string text, position pos);
+	bool	type();
 
 	void    UpdateScenario(double a_deltaTime);
 	void	UpdateFromServer(std::string state);

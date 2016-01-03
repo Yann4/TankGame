@@ -123,7 +123,6 @@ void Server::handleClient(ClientIdentifer client)
 		if(success)
 		{
 			std::string mess = getClientIdentifier(client.id) + ": " + message;
-			std::cout << mess << std::endl;
 			allMessages.push(mess);
 			event = handleMessage(message, client);
 		}

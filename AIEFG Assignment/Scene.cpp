@@ -394,7 +394,44 @@ void Scene::DrawScenario()
 	{
 		bullet->Render();
 	}
+	DrawString("Hello world, how is it all going? I hope that this missive finds you well. Regards, Yannick", position(15, 2));
 }
+
+void Scene::DrawString(std::string text, position pos)
+{
+	void* font = GLUT_BITMAP_HELVETICA_12;
+	float rightOfScreen = glutGet(GLUT_WINDOW_WIDTH);
+
+	std::vector<std::string> sentence = split(text, ' ');
+
+	glRasterPos2d(pos.x, pos.z);
+	glColor3f(0, 0, 0); //Black text
+
+	double rasterPosition[4]; //GL raster position returns 4 doubles. It just does, and it needs to go into an array
+
+	for (auto word : sentence)
+	{
+		int wordWidth = 0;
+		for (char c : word)
+		{
+			wordWidth += glutBitmapWidth(font, c);
+		}
+		glGetDoublev(GL_CURRENT_RASTER_POSITION, rasterPosition);
+		if (rasterPosition[0] + wordWidth > rightOfScreen)
+		{
+			pos.z += 10;
+			glRasterPos2d(pos.x, pos.z);
+		}
+
+		for (char c : word)
+		{
+			glutBitmapCharacter(font, c);
+		}
+		
+		glutBitmapCharacter(font, ' ');
+	}
+}
+
 
 //Update--------------------------------------------------------------------------------------------------
 

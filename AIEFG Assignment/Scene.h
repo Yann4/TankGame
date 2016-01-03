@@ -54,6 +54,7 @@ private:
 	void	placePlayers(int numPlayers);
 
 	void	DrawScenario();
+	void	DrawString(std::string text, position pos);
 
 	void    UpdateScenario(double a_deltaTime);
 	void	UpdateFromServer(std::string state);

@@ -16,7 +16,7 @@ Scene::Scene()
 	players = std::vector<Boid*>();
 
 	latestUpdateTick = 0;
-
+	textMode = false;
 	return;
 }
 
@@ -394,11 +394,27 @@ void Scene::DrawScenario()
 	{
 		bullet->Render();
 	}
-	DrawString("Hello world, how is it all going? I hope that this missive finds you well. Regards, Yannick", position(0.2, 0.9));
+
+	int lines = 0;
+	position textPos = position(0.6, 0.9); //In screen coordinates -1 to 1, (0,0) being the centre of the screen
+
+	for (int i = chat.size() - 1; i > 0; i--)
+	{
+		int thisOne = DrawString(chat.at(i), textPos);
+		lines += thisOne;
+		textPos.z -= (0.05 * thisOne);
+		
+		if (lines >= numLines)
+		{
+			break;
+		}
+	}
+	
 }
 
-void Scene::DrawString(std::string text, position pos)
+int Scene::DrawString(std::string text, position pos)
 {
+	glColor3i(0, 0, 0); //Black text
 	glMatrixMode(GL_PROJECTION);
 		glPushMatrix(); // save
 		glLoadIdentity();// and clear
@@ -411,10 +427,10 @@ void Scene::DrawString(std::string text, position pos)
 	float rightOfScreen = glutGet(GLUT_WINDOW_WIDTH);
 
 	std::vector<std::string> sentence = split(text, ' ');
-	
+
 	glRasterPos2f(pos.x, pos.z);
-	glColor3i(0, 0, 0); //Black text
 	
+	int lines = 1;
 	double rasterPosition[4]; //GL raster position returns 4 doubles. It just does, and it needs to go into an array
 
 	for (auto word : sentence)
@@ -430,6 +446,7 @@ void Scene::DrawString(std::string text, position pos)
 		{
 			pos.z -= 0.05;
 			glRasterPos2f(pos.x, pos.z);
+			lines++;
 		}
 
 		for (char c : word)
@@ -445,6 +462,7 @@ void Scene::DrawString(std::string text, position pos)
 	glPopMatrix(); //revert to the matrix from before.
 	glMatrixMode(GL_MODELVIEW);
 	glPopMatrix();
+	return lines;
 }
 
 
@@ -486,9 +504,15 @@ void Scene::UpdateScenario(double a_deltaTime)
 	if (!server)
 	{
 		std::string input = keyboardUpdate(playerIndex);
-		if (!input.empty())
+		if (!input.empty() && !textMode)
 		{
 			cInstance.pushMessage("K:" + input);
+		}
+		else if(!input.empty())
+		{
+			textMode = false;
+			chat.push_back(input);
+			cInstance.pushMessage("M:" + input);
 		}
 	}
 	else
@@ -504,6 +528,11 @@ void Scene::UpdateScenario(double a_deltaTime)
 			if (inputString.find("K:") != std::string::npos)
 			{
 				players.at(index)->giveUpdateString(inputString.substr(5, std::string::npos), bullets);
+			}
+			else if (inputString.find("M:") != std::string::npos)
+			{
+				std::string text = inputString.substr(0, 2) + inputString.substr(inputString.find("M:") + 2, std::string::npos);
+				chat.push_back(text);
 			}
 		}
 	}
@@ -608,35 +637,47 @@ std::string Scene::keyboardUpdate(int thisPlayerIndex)
 	//Builds up a string to be passed to the player which is used in the update
 	std::string pressedKeys = "";
 
-	if (GetAsyncKeyState('W') || GetAsyncKeyState(VK_UP))
+	if (!textMode)
 	{
-		pressedKeys += "W";
-	}
+		if (GetAsyncKeyState('W') || GetAsyncKeyState(VK_UP))
+		{
+			pressedKeys += "W";
+		}
 
-	if (GetAsyncKeyState('S') || GetAsyncKeyState(VK_DOWN))
+		if (GetAsyncKeyState('S') || GetAsyncKeyState(VK_DOWN))
+		{
+			pressedKeys += "S";
+		}
+
+		if (GetAsyncKeyState('A') || GetAsyncKeyState(VK_LEFT))
+		{
+			pressedKeys += "A";
+		}
+
+		if (GetAsyncKeyState('D') || GetAsyncKeyState(VK_RIGHT))
+		{
+			pressedKeys += "D";
+		}
+
+		if (GetAsyncKeyState(VK_SPACE) && timeSinceLastBullet > 100)
+		{
+			timeSinceLastBullet = 0;
+			pressedKeys += "F";
+		}
+		timeSinceLastBullet++;
+
+		if (GetAsyncKeyState(VK_RETURN))
+		{
+			textMode = true;
+			return "";
+		}
+
+		players.at(thisPlayerIndex)->giveUpdateString(pressedKeys, bullets);
+	}
+	else
 	{
-		pressedKeys += "S";
+		getline(std::cin, pressedKeys);
 	}
-
-	if (GetAsyncKeyState('A') || GetAsyncKeyState(VK_LEFT))
-	{
-		pressedKeys += "A";
-	}
-
-	if (GetAsyncKeyState('D') || GetAsyncKeyState(VK_RIGHT))
-	{
-		pressedKeys += "D";
-	}
-
-	if ((GetAsyncKeyState(VK_SPACE) || GetAsyncKeyState(VK_RETURN)) && timeSinceLastBullet > 100)
-	{
-		timeSinceLastBullet = 0;
-		pressedKeys += "F";		
-	}
-	timeSinceLastBullet++;
-
-	players.at(thisPlayerIndex)->giveUpdateString(pressedKeys, bullets);
-
 	return pressedKeys;
 }
 

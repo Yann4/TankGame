@@ -31,6 +31,10 @@ private:
 	std::vector<Bullet*> bullets;
 	int timeSinceLastBullet = 0;
 
+	std::vector<std::string> chat;
+	int numLines = 15;
+	bool textMode;
+
 	bool server;
 	Server sInstance;
 	Client cInstance;
@@ -54,7 +58,9 @@ private:
 	void	placePlayers(int numPlayers);
 
 	void	DrawScenario();
-	void	DrawString(std::string text, position pos);
+
+	//Returns the number of lines drawn
+	int		DrawString(std::string text, position pos);
 
 	void    UpdateScenario(double a_deltaTime);
 	void	UpdateFromServer(std::string state);

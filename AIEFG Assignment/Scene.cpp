@@ -394,19 +394,27 @@ void Scene::DrawScenario()
 	{
 		bullet->Render();
 	}
-	DrawString("Hello world, how is it all going? I hope that this missive finds you well. Regards, Yannick", position(15, 2));
+	DrawString("Hello world, how is it all going? I hope that this missive finds you well. Regards, Yannick", position(0.2, 0.9));
 }
 
 void Scene::DrawString(std::string text, position pos)
 {
+	glMatrixMode(GL_PROJECTION);
+		glPushMatrix(); // save
+		glLoadIdentity();// and clear
+	glMatrixMode(GL_MODELVIEW);
+		glPushMatrix();
+		glLoadIdentity();
+	glDisable(GL_DEPTH_TEST); // also disable the depth test so renders on top
+
 	void* font = GLUT_BITMAP_HELVETICA_12;
 	float rightOfScreen = glutGet(GLUT_WINDOW_WIDTH);
 
 	std::vector<std::string> sentence = split(text, ' ');
-
-	glRasterPos2d(pos.x, pos.z);
-	glColor3f(0, 0, 0); //Black text
-
+	
+	glRasterPos2f(pos.x, pos.z);
+	glColor3i(0, 0, 0); //Black text
+	
 	double rasterPosition[4]; //GL raster position returns 4 doubles. It just does, and it needs to go into an array
 
 	for (auto word : sentence)
@@ -416,11 +424,12 @@ void Scene::DrawString(std::string text, position pos)
 		{
 			wordWidth += glutBitmapWidth(font, c);
 		}
+
 		glGetDoublev(GL_CURRENT_RASTER_POSITION, rasterPosition);
 		if (rasterPosition[0] + wordWidth > rightOfScreen)
 		{
-			pos.z += 10;
-			glRasterPos2d(pos.x, pos.z);
+			pos.z -= 0.05;
+			glRasterPos2f(pos.x, pos.z);
 		}
 
 		for (char c : word)
@@ -430,6 +439,12 @@ void Scene::DrawString(std::string text, position pos)
 		
 		glutBitmapCharacter(font, ' ');
 	}
+
+	glEnable(GL_DEPTH_TEST); // Turn depth testing back on
+	glMatrixMode(GL_PROJECTION);
+	glPopMatrix(); //revert to the matrix from before.
+	glMatrixMode(GL_MODELVIEW);
+	glPopMatrix();
 }
 
 

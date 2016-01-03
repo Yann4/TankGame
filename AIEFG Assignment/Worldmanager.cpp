@@ -32,8 +32,8 @@ WorldManager::~WorldManager()
 void WorldManager::Initialise()
 {
 	//Set time varialbes.
-	m_iTimeThisFrame = 0;
-	m_iTimeLastFrame = 0;
+	m_iTimeThisFrame = GetTickCount64();
+	m_iTimeLastFrame = m_iTimeThisFrame;
 	
 	//Set the initial camera type to perspective.
 	m_eCameraType = ORTHO;
@@ -48,7 +48,7 @@ void WorldManager::Initialise()
 void WorldManager::Exec_loop()
 {
 	//Get time.
-	m_iTimeThisFrame = GetTickCount();
+	m_iTimeThisFrame = GetTickCount64();
 
 	//exectuion loop.
 	Update();
@@ -60,8 +60,7 @@ void WorldManager::Exec_loop()
 void WorldManager::Update()
 {
 	//Get the delta time.
-	int deltaTime = (m_iTimeThisFrame - m_iTimeLastFrame);
-
+	ULONGLONG deltaTime = (m_iTimeThisFrame - m_iTimeLastFrame);
 	//Set time last frame to the current time.
 	m_iTimeLastFrame = m_iTimeThisFrame;
 

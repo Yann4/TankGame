@@ -27,8 +27,8 @@ private:
 	Scene*					m_pScenario;							
 	Camera*					m_pCamera;
 	
-	int						m_iTimeThisFrame;			//Amount of time passed since last frame.
-	int						m_iTimeLastFrame;			//Keeps track of time passed.
+	ULONGLONG				m_iTimeThisFrame;			//Amount of time passed since last frame.
+	ULONGLONG				m_iTimeLastFrame;			//Keeps track of time passed.
 
 public:
 	WorldManager();										//default constructor

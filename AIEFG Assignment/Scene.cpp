@@ -398,10 +398,12 @@ void Scene::DrawScenario()
 
 //Update--------------------------------------------------------------------------------------------------
 
-void Scene::Update(int a_deltaTime)
+void Scene::Update(ULONGLONG a_deltaTime)
 {
+	double deltaInS = a_deltaTime / 1000.0;
+
 	//Update the Scenario.
-	UpdateScenario(a_deltaTime);
+	UpdateScenario(deltaInS);
 
 	if (server)
 	{
@@ -427,7 +429,7 @@ void Scene::Update(int a_deltaTime)
 	
 }
 
-void Scene::UpdateScenario(int a_deltaTime)
+void Scene::UpdateScenario(double a_deltaTime)
 {
 	if (!server)
 	{
@@ -554,27 +556,27 @@ std::string Scene::keyboardUpdate(int thisPlayerIndex)
 	//Builds up a string to be passed to the player which is used in the update
 	std::string pressedKeys = "";
 
-	if (GetAsyncKeyState('W'))
+	if (GetAsyncKeyState('W') || GetAsyncKeyState(VK_UP))
 	{
 		pressedKeys += "W";
 	}
 
-	if (GetAsyncKeyState('S'))
+	if (GetAsyncKeyState('S') || GetAsyncKeyState(VK_DOWN))
 	{
 		pressedKeys += "S";
 	}
 
-	if (GetAsyncKeyState('A'))
+	if (GetAsyncKeyState('A') || GetAsyncKeyState(VK_LEFT))
 	{
 		pressedKeys += "A";
 	}
 
-	if (GetAsyncKeyState('D'))
+	if (GetAsyncKeyState('D') || GetAsyncKeyState(VK_RIGHT))
 	{
 		pressedKeys += "D";
 	}
 
-	if (GetAsyncKeyState(VK_SPACE) && timeSinceLastBullet > 100)
+	if ((GetAsyncKeyState(VK_SPACE) || GetAsyncKeyState(VK_RETURN)) && timeSinceLastBullet > 100)
 	{
 		timeSinceLastBullet = 0;
 		pressedKeys += "F";		

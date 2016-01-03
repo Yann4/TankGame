@@ -31,10 +31,13 @@ Boid::Boid(int id, position pos) : id(id), pos(pos)
 	lives = 3;
 }
 
-void Boid::Update(float delta)
+void Boid::Update(double delta)
 {
-	delta = 16;
-	velocity /= delta;
+	if (delta != 0)
+	{
+		velocity /= delta;
+	}
+
 	pos += velocity;
 	velocity = position(0, 0);
 }
@@ -60,12 +63,12 @@ void Boid::giveUpdateString(std::string actions, std::vector<Bullet*>& bullets)
 	if (actions.find("A") != std::string::npos)
 	{
 		//Rotate left
-		rotation -= turnSpeed;
+		rotation += turnSpeed;
 	}
 	if (actions.find("D") != std::string::npos)
 	{
 		//Rotate right
-		rotation += turnSpeed;
+		rotation -= turnSpeed;
 	}
 
 	if (rotation >= 360)

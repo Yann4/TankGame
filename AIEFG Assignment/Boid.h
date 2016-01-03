@@ -40,7 +40,7 @@ private:
 	int lives;
 	position spawnPoint;
 	position velocity;
-	float maxVelocity = 1.0f;
+	float maxVelocity = 0.001f;
 
 	float rotation;
 	float turnSpeed = 3.0f;
@@ -54,7 +54,7 @@ public:
 	Boid(int id, position pos);
 	Boid& operator=(const Boid&) = default;
 
-	void Update(float delta);
+	void Update(double delta);
 	void Render();
 
 	void UpdateState(position p, float rotation);

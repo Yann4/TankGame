@@ -43,7 +43,7 @@ public:
 
 	bool	Initialise();
 	void	Render();
-	void	Update(int a_deltaTime);								
+	void	Update(ULONGLONG a_deltaTime);								
 	
 private:
 	void	setupProgram();
@@ -55,7 +55,7 @@ private:
 
 	void	DrawScenario();
 
-	void    UpdateScenario(int a_deltaTime);
+	void    UpdateScenario(double a_deltaTime);
 	void	UpdateFromServer(std::string state);
 	std::string	keyboardUpdate(int thisPlayerIndex);
 

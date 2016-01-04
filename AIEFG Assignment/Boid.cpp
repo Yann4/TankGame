@@ -15,7 +15,7 @@ Boid::Boid()
 	width = 0;
 	height = 0;
 
-	lives = 3;
+	lives = 20;
 	spawnPoint = pos;
 }
 
@@ -28,7 +28,7 @@ Boid::Boid(int id, position pos) : id(id), pos(pos)
 
 	width = 0.25f;
 	height = 0.5f;
-	lives = 3;
+	lives = 20;
 }
 
 void Boid::Update(double delta)
@@ -74,6 +74,10 @@ void Boid::giveUpdateString(std::string actions, std::vector<Bullet*>& bullets)
 	if (rotation >= 360)
 	{
 		rotation -= 360;
+	}
+	if (rotation <= -360)
+	{
+		rotation += 360;
 	}
 
 	if (actions.find("W") != std::string::npos)

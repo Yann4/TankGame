@@ -64,13 +64,15 @@ public:
 	Collision::BoundingBox getBoundingBox() { return Collision::BoundingBox(pos.x, pos.z, width, height); }
 	BoidInfo getInfo() { return BoidInfo(id, pos, velocity, isTarget); }
 	
-	//Format is: "P:[id],[xPos],[zPos],[rotation]"
+	//Format is: "P:[id],[xPos],[zPos],[rotation],[lives]"
 	std::string getInfoString() {
 		return "P:" + std::to_string(id) + "," + std::to_string(pos.x).substr(0, 6) + "," + std::to_string(pos.z).substr(0, 6)
-			+ "," + std::to_string(rotation).substr(0, 6);
+			+ "," + std::to_string(rotation).substr(0, 6) + "," + std::to_string(lives);
 	}
 
 	void giveUpdateString(std::string actions, std::vector<Bullet*>& bullets);
 	
 	void hitByBullet();
+	int getLives() { return lives; }
+	void setLives(int noLives) { lives = noLives; }
 };

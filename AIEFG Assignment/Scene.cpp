@@ -78,6 +78,7 @@ void Scene::setupProgram()
 	}
 	else
 	{
+		sendUpdate = shouldSendUpdate;
 		sInstance.turnOn();
 	}
 
@@ -485,7 +486,11 @@ void Scene::Update(ULONGLONG a_deltaTime)
 
 	if (server)
 	{
-		sInstance.broadcast(Message(serialiseCurrentState(), -1));
+		if (sendUpdate++ >= shouldSendUpdate)
+		{
+			sInstance.broadcast(Message(serialiseCurrentState(), -1));
+			sendUpdate = 0;
+		}
 	}
 	else
 	{

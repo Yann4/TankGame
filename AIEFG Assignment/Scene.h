@@ -38,6 +38,8 @@ private:
 	std::string typedString;
 
 	bool server;
+	int sendUpdate;
+	int shouldSendUpdate = 1;
 	Server sInstance;
 	Client cInstance;
 	int playerIndex;

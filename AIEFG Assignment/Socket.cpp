@@ -14,7 +14,7 @@ SOCKET Socket::createSocket(std::string port)
     int retResult = getaddrinfo(NULL, port.c_str(), &hints, &result);
     if (retResult != 0)
     {
-        std::cout << "getaddrinfo failed: " << retResult;
+        std::cerr << "getaddrinfo failed: " << retResult;
         WSACleanup();
         return 1;
     }
@@ -24,7 +24,7 @@ SOCKET Socket::createSocket(std::string port)
 
     if (sock == INVALID_SOCKET)
     {
-        std::cout << "Error at socket(): " << WSAGetLastError();
+        std::cerr << "Error at socket(): " << WSAGetLastError();
         FreeAddrInfo(result);
         WSACleanup();
         return 1;

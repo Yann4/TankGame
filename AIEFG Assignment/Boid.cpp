@@ -17,6 +17,8 @@ Boid::Boid()
 
 	lives = 20;
 	spawnPoint = pos;
+
+	carryMomentum = false;
 }
 
 Boid::Boid(int id, position pos) : id(id), pos(pos)
@@ -29,23 +31,31 @@ Boid::Boid(int id, position pos) : id(id), pos(pos)
 	width = 0.25f;
 	height = 0.5f;
 	lives = 20;
+
+	carryMomentum = false;
 }
 
 void Boid::Update(double delta)
 {
+	position displacement = position(0,0);
 	if (delta != 0)
 	{
-		velocity /= delta;
+		displacement = velocity / delta;
 	}
 
-	pos += velocity;
-	velocity = position(0, 0);
+	pos += displacement;
+
+	if (!carryMomentum)
+	{
+		velocity = position(0, 0);
+	} 
 }
 
 void Boid::UpdateState(position p, float rot)
 {
 	pos = p;
 	rotation = rot;
+	velocity = position(0, 0);
 }
 
 void Boid::Render()

@@ -49,6 +49,8 @@ private:
 
 	float width, height;
 	float bulletIndex = 0;
+
+	bool carryMomentum;
 public:
 	Boid();
 	Boid(int id, position pos);
@@ -75,4 +77,6 @@ public:
 	void hitByBullet();
 	int getLives() { return lives; }
 	void setLives(int noLives) { lives = noLives; }
+
+	void setInterpolationMode(bool shouldCarry) { carryMomentum = shouldCarry; }
 };

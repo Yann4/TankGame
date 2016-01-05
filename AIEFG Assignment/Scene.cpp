@@ -309,6 +309,8 @@ void Scene::SetUpScenario()
 				if (!message.empty() && message.find("ID") != std::string::npos)
 				{
 					playerIndex = atoi(message.substr(message.find("ID") + 3, 1).c_str());
+					int otherPlayer = playerIndex == 0 ? 1 : 0;
+					players.at(otherPlayer)->setInterpolationMode(true);
 					initialised++;
 				}
 			}	
@@ -501,9 +503,9 @@ void Scene::Update(ULONGLONG a_deltaTime)
 		{
 			latestUpdate = messages.front();
 			messages.pop();
-
 			if (!latestUpdate.empty())
 			{
+				
 				UpdateFromServer(latestUpdate);
 			}
 		}
@@ -546,6 +548,14 @@ void Scene::UpdateScenario(double a_deltaTime)
 			if (inputString.find("K:") != std::string::npos)
 			{
 				players.at(index)->giveUpdateString(inputString.substr(5, std::string::npos), bullets);
+
+				if (index == 0)
+				{
+					sInstance.whisper(Message(inputString, 1));
+				}else
+				{
+					sInstance.whisper(Message(inputString, 0));
+				}
 			}
 			else if (inputString.find("M:") != std::string::npos)
 			{
@@ -602,6 +612,7 @@ void Scene::UpdateScenario(double a_deltaTime)
 			bullets[i] = bullets.back();
 			bullets.pop_back();
 		}
+		
 	}
 }
 
@@ -615,7 +626,6 @@ void Scene::UpdateFromServer(std::string state)
 		{
 			continue;
 		}
-		std::cout << token << std::endl;
 		std::regex playerUpdate("P:[0-9],-*[0-9]+.[0-9]+,-*[0-9]+.[0-9]+,-*[0-9]+.[0-9]+,[0-9]+");
 		if (std::regex_match(token, playerUpdate))
 		{
@@ -623,7 +633,6 @@ void Scene::UpdateFromServer(std::string state)
 			position p = position(atof(token.substr(4, 6).c_str()), atof(token.substr(11, 6).c_str()));
 			float rotation = atof(token.substr(18, 6).c_str());
 			int lives = atoi(token.substr(25, std::string::npos).c_str());
-			std::cout << id << ": " << p.x << ", " << p.z << std::endl;
 
 			players.at(id)->UpdateState(p, rotation);
 			
@@ -658,6 +667,11 @@ void Scene::UpdateFromServer(std::string state)
 		else if (token.find("M:") != std::string::npos)
 		{
 			chat.push_back(token.substr(token.find("M:") + 2, std::string::npos));
+		}
+		else if (token.find("K:") != std::string::npos)
+		{
+			int ind = playerIndex == 0 ? 1 : 0;
+			players.at(ind)->giveUpdateString(token.substr(token.find("K:") + 2, std::string::npos), bullets);
 		}
 	}
 }
@@ -1094,6 +1108,5 @@ std::string Scene::serialiseCurrentState()
 	{
 		message += b->getInfoString() + "\\";
 	}
-	std::cout << message << std::endl;
 	return message;
 }

@@ -39,7 +39,7 @@ private:
 
 	bool server;
 	int sendUpdate;
-	int shouldSendUpdate = 1;
+	int shouldSendUpdate = 3;
 	Server sInstance;
 	Client cInstance;
 	int playerIndex;

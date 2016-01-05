@@ -2,7 +2,6 @@
 #include "gl/gl.h"
 #include "gl/glu.h"
 
-
 //--------------------------------------------------------------------------------------------------------
 
 Scene::Scene()
@@ -511,7 +510,6 @@ void Scene::Update(ULONGLONG a_deltaTime)
 		}
 		cInstance.update();
 	}
-	
 }
 
 void Scene::UpdateScenario(double a_deltaTime)
@@ -612,7 +610,6 @@ void Scene::UpdateScenario(double a_deltaTime)
 			bullets[i] = bullets.back();
 			bullets.pop_back();
 		}
-		
 	}
 }
 
@@ -639,20 +636,6 @@ void Scene::UpdateFromServer(std::string state)
 			if (players.at(id)->getLives() != lives)
 			{
 				players.at(id)->setLives(lives);
-			}
-		}
-		else if (token.at(0) == 'B')
-		{
-			int id = atoi(token.substr(2, 2).c_str());
-			position p = position(atof(token.substr(5, 6).c_str()), atof(token.substr(12, 6).c_str()));
-			float rotation = atof(token.substr(19, 6).c_str());
-			
-			for (Bullet* b : bullets)
-			{
-				if (b->getID() == id)
-				{
-					b->UpdateState(p, rotation);
-				}
 			}
 		}
 		else if (token.at(0) == 'U')
@@ -1102,11 +1085,6 @@ std::string Scene::serialiseCurrentState()
 	for (Boid* p : players)
 	{
 		message += p->getInfoString() + "\\";
-	}
-
-	for (Bullet* b : bullets)
-	{
-		message += b->getInfoString() + "\\";
 	}
 	return message;
 }

@@ -48,7 +48,7 @@ void Boid::Update(double delta)
 	if (!carryMomentum)
 	{
 		velocity = position(0, 0);
-	} 
+	}
 }
 
 void Boid::UpdateState(position p, float rot)

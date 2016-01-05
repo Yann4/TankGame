@@ -29,7 +29,10 @@ void Bullet::UpdateState(position p, float rot)
 //Returns true if the bullet should be removed
 bool Bullet::Update(float delta, std::vector<Boid*>& players, std::vector<Obstacle*>& walls)
 {
-	pos += velocity / delta;
+	if (delta != 0)
+	{
+		pos += velocity / delta;
+	}
 
 	Collision::MTV mtv;
 	Collision::BoundingBox bb(pos.x, pos.z, size.x / 2, size.z / 2);

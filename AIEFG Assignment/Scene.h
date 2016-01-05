@@ -22,6 +22,7 @@
 #include <sstream>
 #include <iostream>
 #include <regex>
+#include <conio.h>
 
 class Scene
 {
@@ -39,7 +40,7 @@ private:
 
 	bool server;
 	int sendUpdate;
-	int shouldSendUpdate = 3;
+	int shouldSendUpdate = 2;
 	Server sInstance;
 	Client cInstance;
 	int playerIndex;

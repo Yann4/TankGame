@@ -2,6 +2,7 @@
 #include "gl/gl.h"
 #include "gl/glu.h"
 
+
 //--------------------------------------------------------------------------------------------------------
 
 Scene::Scene()
@@ -504,12 +505,12 @@ void Scene::Update(ULONGLONG a_deltaTime)
 			messages.pop();
 			if (!latestUpdate.empty())
 			{
-				
 				UpdateFromServer(latestUpdate);
 			}
 		}
 		cInstance.update();
 	}
+	
 }
 
 void Scene::UpdateScenario(double a_deltaTime)
@@ -603,6 +604,7 @@ void Scene::UpdateScenario(double a_deltaTime)
 		}
 	}
 
+
 	for (int i = 0; i < bullets.size(); ++i)
 	{
 		if (bullets.at(i)->Update(a_deltaTime, players, walls))
@@ -610,6 +612,7 @@ void Scene::UpdateScenario(double a_deltaTime)
 			bullets[i] = bullets.back();
 			bullets.pop_back();
 		}
+		
 	}
 }
 

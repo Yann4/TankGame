@@ -29,6 +29,7 @@ private:
 	
 	ULONGLONG				m_iTimeThisFrame;			//Amount of time passed since last frame.
 	ULONGLONG				m_iTimeLastFrame;			//Keeps track of time passed.
+	int						timePerFrame = 16;
 
 public:
 	WorldManager();										//default constructor

@@ -84,13 +84,16 @@ void Server::shutdownServer()
 void Server::broadcast(Message message)
 {
 	std::string mess = getClientIdentifier(message.senderID) + ": " + message.data + "\0";
-
+	if (mess.find("M:") != std::string::npos)
+	{
+		std::cout << "Sending: " << mess << std::endl;
+	}
 	for(int i = 0; i < clients.size(); i++)
 	{
-			if(clients.at(i).id != message.senderID)
-			{
-				send(clients.at(i).sock, mess.c_str(), mess.length(), 0);
-			}
+		if(clients.at(i).id != message.senderID)
+		{
+			send(clients.at(i).sock, mess.c_str(), mess.length(), 0);
+		}
 	}
 }
 

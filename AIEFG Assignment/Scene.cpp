@@ -510,7 +510,6 @@ void Scene::Update(ULONGLONG a_deltaTime)
 				{
 					latestUpdate = latestUpdate.substr(8, std::string::npos);
 				}
-				std::cout << latestUpdate << std::endl;
 
 				UpdateFromServer(latestUpdate);
 			}
@@ -565,9 +564,10 @@ void Scene::UpdateScenario(double a_deltaTime)
 			}
 			else if (inputString.find("M:") != std::string::npos)
 			{
+				std::cout << "Input to server: " << inputString << std::endl;
 				std::string text = inputString.substr(0, 2) + inputString.substr(inputString.find("M:") + 2, std::string::npos);
+				std::cout << "Message + sender: " << text << std::endl;
 				chat.push_back(text);
-
 				sInstance.broadcast(Message("M:" + text, -1));
 			}
 		}
@@ -665,6 +665,7 @@ void Scene::UpdateFromServer(std::string state)
 		}
 		else if (token.find("M:") != std::string::npos)
 		{
+			std::cout << token << std::endl;
 			chat.push_back(token.substr(token.find("M:") + 2, std::string::npos));
 		}
 		else if (token.find("K:") != std::string::npos)

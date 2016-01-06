@@ -483,9 +483,6 @@ void Scene::Update(ULONGLONG a_deltaTime)
 {
 	double deltaInS = a_deltaTime / 1000.0;
 
-	//Update the Scenario.
-	UpdateScenario(deltaInS);
-
 	if (server)
 	{
 		if (sendUpdate++ >= shouldSendUpdate)
@@ -516,6 +513,9 @@ void Scene::Update(ULONGLONG a_deltaTime)
 		}
 		cInstance.update();
 	}
+
+	//Update the Scenario.
+	UpdateScenario(deltaInS);
 	
 }
 

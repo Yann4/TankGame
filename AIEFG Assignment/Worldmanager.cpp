@@ -53,11 +53,6 @@ void WorldManager::Exec_loop()
 	//exectuion loop.
 	Update();
 	Render();
-
-	if (GetTickCount64() - m_iTimeThisFrame < timePerFrame)
-	{
-		Sleep(GetTickCount64() - m_iTimeThisFrame);
-	}
 }
 
 //--------------------------------------------------------------------------------------------------------

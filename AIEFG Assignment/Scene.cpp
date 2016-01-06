@@ -626,6 +626,7 @@ void Scene::UpdateScenario(double a_deltaTime)
 void Scene::UpdateFromServer(std::string state)
 {
 	std::vector<std::string> tokens = split(state, '\\');
+	bool mangled = true;
 
 	for (std::string token : tokens)
 	{
@@ -636,6 +637,10 @@ void Scene::UpdateFromServer(std::string state)
 		std::regex playerUpdate("P:[0-9],-*[0-9]+.[0-9]+,-*[0-9]+.[0-9]+,-*[0-9]+.[0-9]+,[0-9]+");
 		if (std::regex_match(token, playerUpdate))
 		{
+			if (mangled)
+			{
+				break;
+			}
 			int id = atoi(token.substr(2, 1).c_str());
 			position p = position(atof(token.substr(4, 6).c_str()), atof(token.substr(11, 6).c_str()));
 			float rotation = atof(token.substr(18, 6).c_str());
@@ -650,6 +655,7 @@ void Scene::UpdateFromServer(std::string state)
 		}
 		else if (token.at(0) == 'U')
 		{
+			mangled = false;
 			unsigned long long frameNumber = std::strtoull(token.substr(1, std::string::npos).c_str(), '\0', 10);
 			if (frameNumber < latestUpdateTick)
 			{
@@ -1070,6 +1076,7 @@ bool Scene::type()
 
 std::string Scene::serialiseInitialState()
 {
+
 	std::string message = "\\I\\";
 
 	//Wall data in format "\W:xx.x,zz.z\"

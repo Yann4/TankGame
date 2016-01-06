@@ -5,6 +5,7 @@
 #include <thread>
 #include <queue>
 #include <iostream>
+#include <mutex>
 
 #include "Socket.h"
 
@@ -15,7 +16,9 @@ private:
     SOCKET sock;
 
     std::thread getMessageThread;
-
+	
+	std::mutex sendMessageMutex;
+	std::mutex recvMessageMutex;
     std::queue<std::string> toSend;
     std::queue<std::string> recieved;
 public:

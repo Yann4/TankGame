@@ -2,7 +2,6 @@
 
 Server::Server()
 {
-	
 }
 
 Server::~Server()
@@ -54,8 +53,10 @@ void Server::update()
 
 std::queue<std::string> Server::getMessages()
 {
+	messageMutex.lock();
 	if (allMessages.empty())
 	{
+		messageMutex.unlock();
 		return std::queue<std::string>();
 	}
 
@@ -67,6 +68,7 @@ std::queue<std::string> Server::getMessages()
 		allMessages.pop();
 	}
 
+	messageMutex.unlock();
 	return toRet;
 }
 
@@ -126,7 +128,9 @@ void Server::handleClient(ClientIdentifer client)
 		if(success)
 		{
 			std::string mess = getClientIdentifier(client.id) + ": " + message;
+			messageMutex.lock();
 			allMessages.push(mess);
+			messageMutex.unlock();
 			event = handleMessage(message, client);
 		}
 	}

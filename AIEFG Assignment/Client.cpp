@@ -55,7 +55,9 @@ void Client::recieveMessage(SOCKET listenOn)
 			char recvBuf[Socket::DEFAULT_BUFLEN];
 			int iRes = recv(listenOn, recvBuf, Socket::DEFAULT_BUFLEN, 0);
 			std::string message = recvBuf;
+			recvMessageMutex.lock();
 			recieved.push(message.substr(0, bytesAvailable));
+			recvMessageMutex.unlock();
 		}
 	}
 }
@@ -82,6 +84,7 @@ void Client::Shutdown()
 
 void Client::update()
 {
+	sendMessageMutex.lock();
 	while(!toSend.empty())
 	{
 		std::string message = toSend.front();
@@ -100,12 +103,15 @@ void Client::update()
 			std::cerr << "recv fail: " << WSAGetLastError() << std::endl;
 		}
 	}
+	sendMessageMutex.unlock();
 }
 
 std::queue<std::string> Client::getMessages()
 {
+	recvMessageMutex.lock();
 	if (recieved.empty())
 	{
+		recvMessageMutex.unlock();
 		return std::queue<std::string>();
 	}
 	auto toRet = std::queue<std::string>();
@@ -116,10 +122,13 @@ std::queue<std::string> Client::getMessages()
 		recieved.pop();
 	}
 
+	recvMessageMutex.unlock();
 	return toRet;
 }
 
 void Client::pushMessage(std::string message)
 {
+	sendMessageMutex.lock();
 	toSend.push(message);
+	sendMessageMutex.unlock();
 }

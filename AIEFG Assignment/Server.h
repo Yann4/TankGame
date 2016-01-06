@@ -7,6 +7,7 @@
 #include <map>
 #include <functional>
 #include <queue>
+#include <mutex>
 
 #include "Socket.h"
 #include "Structs.h"
@@ -32,6 +33,7 @@ private:
     std::thread runThread;
     std::atomic<bool> run;
     SOCKET listenSock;
+	std::mutex messageMutex;
 
 	std::string welcomeMessage;
 

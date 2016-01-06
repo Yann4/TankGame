@@ -568,7 +568,7 @@ void Scene::UpdateScenario(double a_deltaTime)
 				std::string text = inputString.substr(0, 2) + inputString.substr(inputString.find("M:") + 2, std::string::npos);
 				std::cout << "Message + sender: " << text << std::endl;
 				chat.push_back(text);
-				sInstance.broadcast(Message("M:" + text, -1));
+				sInstance.broadcast(Message("\\M:" + text + "\\", -1));
 			}
 		}
 	}
@@ -610,7 +610,6 @@ void Scene::UpdateScenario(double a_deltaTime)
 			}
 		}
 	}
-
 
 	for (int i = 0; i < bullets.size(); ++i)
 	{

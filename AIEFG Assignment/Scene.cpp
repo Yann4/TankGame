@@ -483,6 +483,9 @@ void Scene::Update(ULONGLONG a_deltaTime)
 {
 	double deltaInS = a_deltaTime / 1000.0;
 
+	//Update the Scenario.
+	UpdateScenario(deltaInS);
+
 	if (server)
 	{
 		if (sendUpdate++ >= shouldSendUpdate)
@@ -513,9 +516,6 @@ void Scene::Update(ULONGLONG a_deltaTime)
 		}
 		cInstance.update();
 	}
-
-	//Update the Scenario.
-	UpdateScenario(deltaInS);
 	
 }
 
@@ -528,7 +528,7 @@ void Scene::UpdateScenario(double a_deltaTime)
 			std::string input = keyboardUpdate(playerIndex);
 			if (!input.empty() && !textMode)
 			{
-				cInstance.pushMessage("K:" + input);
+				cInstance.pushMessage("\\K:" + input + "\\");
 			}
 		}
 		else
@@ -631,6 +631,7 @@ void Scene::UpdateFromServer(std::string state)
 		{
 			continue;
 		}
+
 		std::regex playerUpdate("P:[0-9],-*[0-9]+.[0-9]+,-*[0-9]+.[0-9]+,-*[0-9]+.[0-9]+,[0-9]+");
 		if (std::regex_match(token, playerUpdate))
 		{

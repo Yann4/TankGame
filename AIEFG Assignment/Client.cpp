@@ -108,7 +108,9 @@ void Client::update()
 
 std::queue<std::string> Client::getMessages()
 {
+	std::cout << "Locking" << std::endl;
 	recvMessageMutex.lock();
+	std::cout << "Locked" << std::endl;
 	if (recieved.empty())
 	{
 		recvMessageMutex.unlock();
@@ -123,6 +125,8 @@ std::queue<std::string> Client::getMessages()
 	}
 
 	recvMessageMutex.unlock();
+	std::cout << "UnLocked" << std::endl;
+
 	return toRet;
 }
 

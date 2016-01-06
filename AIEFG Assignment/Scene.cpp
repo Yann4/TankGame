@@ -482,10 +482,8 @@ int Scene::DrawString(std::string text, position pos)
 void Scene::Update(ULONGLONG a_deltaTime)
 {
 	double deltaInS = a_deltaTime / 1000.0;
-
-	//Update the Scenario.
 	UpdateScenario(deltaInS);
-
+	
 	if (server)
 	{
 		if (sendUpdate++ >= shouldSendUpdate)
@@ -501,7 +499,6 @@ void Scene::Update(ULONGLONG a_deltaTime)
 
 		while (!messages.empty())
 		{
-			
 			latestUpdate = messages.front();
 			messages.pop();
 			if (!latestUpdate.empty())
@@ -510,13 +507,11 @@ void Scene::Update(ULONGLONG a_deltaTime)
 				{
 					latestUpdate = latestUpdate.substr(8, std::string::npos);
 				}
-
 				UpdateFromServer(latestUpdate);
 			}
 		}
 		cInstance.update();
-	}
-	
+	}	
 }
 
 void Scene::UpdateScenario(double a_deltaTime)
@@ -574,7 +569,7 @@ void Scene::UpdateScenario(double a_deltaTime)
 	for (int i = 0; i < players.size(); ++i)
 	{
 		players.at(i)->Update(a_deltaTime);
-		
+
 		//Make sure stays on screen. Should definitely be prettier - not very extensible
 		position pPos = players.at(i)->getInfo().pos;
 		if (pPos.x >= 21)
@@ -616,7 +611,6 @@ void Scene::UpdateScenario(double a_deltaTime)
 			bullets[i] = bullets.back();
 			bullets.pop_back();
 		}
-		
 	}
 }
 
@@ -639,13 +633,14 @@ void Scene::UpdateFromServer(std::string state)
 			{
 				break;
 			}
+
 			int id = atoi(token.substr(2, 1).c_str());
 			position p = position(atof(token.substr(4, 6).c_str()), atof(token.substr(11, 6).c_str()));
 			float rotation = atof(token.substr(18, 6).c_str());
 			int lives = atoi(token.substr(25, std::string::npos).c_str());
 
 			players.at(id)->UpdateState(p, rotation);
-			
+
 			if (players.at(id)->getLives() != lives)
 			{
 				players.at(id)->setLives(lives);

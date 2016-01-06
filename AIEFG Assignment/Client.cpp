@@ -108,7 +108,6 @@ std::queue<std::string> Client::getMessages()
 	{
 		return std::queue<std::string>();
 	}
-	
 	auto toRet = std::queue<std::string>();
 
 	while(!recieved.empty())

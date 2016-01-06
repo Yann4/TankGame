@@ -501,10 +501,17 @@ void Scene::Update(ULONGLONG a_deltaTime)
 
 		while (!messages.empty())
 		{
+			
 			latestUpdate = messages.front();
 			messages.pop();
 			if (!latestUpdate.empty())
 			{
+				if (latestUpdate.find("Server:") != std::string::npos)
+				{
+					latestUpdate = latestUpdate.substr(8, std::string::npos);
+				}
+				std::cout << latestUpdate << std::endl;
+
 				UpdateFromServer(latestUpdate);
 			}
 		}
